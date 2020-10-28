@@ -11,16 +11,15 @@
 //! # Example:
 //! ```
 //! extern crate actor_http_server as http;
-//! 
+//! use wapc_guest::HandlerResult;
+//! use http::{Request, Response, Handlers};
+//!
 //! #[no_mangle]
 //! pub fn wapc_init() {
-//!     http::Handlers::register_handle_request(increment_counter);
+//!     http::Handlers::register_handle_request(hello);
 //! }
-//! 
-//! #[macro_use]
-//! extern crate serde_json;
-//! 
-//! fn increment_counter(msg: http::Request) -> HandlerResult<http::Response> {
+//!
+//! fn hello(_msg: http::Request) -> HandlerResult<http::Response> {
 //!     Ok(http::Response::ok())
 //! }
 //! ```
@@ -31,7 +30,6 @@ pub mod generated;
 extern crate wapc_guest as guest;
 use serde::Serialize;
 use std::collections::HashMap;
-pub use guest::HandlerResult;
 
 pub use generated::{deserialize, serialize, Handlers, Request, Response};
 
@@ -88,8 +86,9 @@ impl Response {
 }
 
 #[cfg(test)]
-mod test{
-    use crate::{HandlerResult, Handlers, Request, Response};
+mod test {
+    use crate::{Handlers, Request, Response};
+    use wapc_guest::HandlerResult;
     #[test]
     fn it_works() {
         Handlers::register_handle_request(hr);

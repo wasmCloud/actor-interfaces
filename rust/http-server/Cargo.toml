@@ -10,9 +10,6 @@ readme = "README.md"
 keywords = ["webassembly", "wasm", "wascc", "actor"]
 categories = ["wasm", "api-bindings"]
 
-[lib]
-crate-type = ["cdylib", "dylib"]
-
 [dependencies]
 wapc-guest = "0.4.0"
 serde = { version = "1.0.117" , features = ["derive"] }
