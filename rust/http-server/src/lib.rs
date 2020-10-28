@@ -31,6 +31,7 @@ pub mod generated;
 extern crate wapc_guest as guest;
 use serde::Serialize;
 use std::collections::HashMap;
+pub use guest::HandlerResult;
 
 pub use generated::{deserialize, serialize, Handlers, Request, Response};
 
@@ -88,8 +89,14 @@ impl Response {
 
 #[cfg(test)]
 mod test{
+    use crate::{HandlerResult, Handlers, Request, Response};
     #[test]
     fn it_works() {
+        Handlers::register_handle_request(hr);
         assert!(true);
+    }
+
+    fn hr(_req: Request) -> HandlerResult<Response> {
+        Ok(Response::ok())
     }
 }
