@@ -1,0 +1,21 @@
+namespace "wascc:extras"
+
+interface {
+  RequestGuid{GeneratorRequest}: GeneratorResult
+  RequestRandom{GeneratorRequest}: GeneratorResult
+  RequestSequence{GeneratorRequest}: GeneratorResult
+}
+
+type GeneratorResult {
+  guid: string?
+  sequenceNumber: u64
+  random_number: u32 
+}
+
+type GeneratorRequest {
+  guid: bool
+  sequence: bool
+  random: bool
+  min: u32
+  max: u32
+}
