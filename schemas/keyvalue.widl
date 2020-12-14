@@ -1,4 +1,4 @@
-namespace "wascc:keyvalue"
+namespace "wasmcloud:keyvalue"
 
 interface {
     Get(key: string): GetResponse
