@@ -22,3 +22,19 @@
 mod generated;
 
 pub use generated::*;
+
+pub const OP_ADD: &str = "Add";
+pub const OP_GET: &str = "Get";
+pub const OP_SET: &str = "Set";
+pub const OP_DEL: &str = "Del";
+pub const OP_CLEAR: &str = "Clear";
+pub const OP_RANGE: &str = "Range";
+pub const OP_PUSH: &str = "Push";
+pub const OP_LIST_DEL: &str = "ListItemDelete";
+
+pub const OP_SET_ADD: &str = "SetAdd";
+pub const OP_SET_REMOVE: &str = "SetRemove";
+pub const OP_SET_UNION: &str = "SetUnion";
+pub const OP_SET_INTERSECT: &str = "SetIntersection";
+pub const OP_SET_QUERY: &str = "SetQuery";
+pub const OP_KEY_EXISTS: &str = "KeyExists";
