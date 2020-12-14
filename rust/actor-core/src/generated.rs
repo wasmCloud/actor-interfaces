@@ -10,7 +10,6 @@ use guest::prelude::*;
 use lazy_static::lazy_static;
 use std::sync::RwLock;
 
-
 /// Used to register core message handlers
 pub struct Handlers {}
 
@@ -43,7 +42,7 @@ pub struct CapabilityConfiguration {
     pub values: std::collections::HashMap<String, String>,
 }
 
-/// A request sent to the actor by the host itself in order to determine 
+/// A request sent to the actor by the host itself in order to determine
 /// health status
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct HealthCheckRequest {

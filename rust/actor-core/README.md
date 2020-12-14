@@ -1,4 +1,4 @@
-# waSCC Core Actor Interface
+# wasmCloud Core Actor Interface
 
 All actors must respond to the core `HealthCheckRequest` message with either an `Err`
 or a `HealthCheckResponse`. The following is an example of what an actor looks like
@@ -17,4 +17,3 @@ that only responds to the health check message:
      Ok(HealthCheckResponse::healthy())
  }
 ```
-

@@ -1,13 +1,13 @@
 #![doc(html_logo_url = "https://avatars2.githubusercontent.com/u/52050279?s=200&v=4")]
-//! # Core waSCC Actor Interface
+//! # Core wasmCloud Actor Interface
 //!
-//! All waSCC actors must respond to the core health request message, and all capability
+//! All wasmCloud actors must respond to the core health request message, and all capability
 //! providers must be able to receive binding configuration according to the [CapabilityConfiguration](struct.CapabilityConfiguration.html)
-//! struct. 
+//! struct.
 //!
 //! # Example
 //! ```
-//! extern crate actor_core as actorcore; // Avoid using the module name `core` 
+//! extern crate actor_core as actorcore; // Avoid using the module name `core`
 //! use wapc_guest::HandlerResult;
 //! use actorcore::{HealthCheckRequest, HealthCheckResponse, Handlers};
 //!
@@ -23,13 +23,16 @@
 //!
 
 mod generated;
-pub use generated::{serialize, deserialize, HealthCheckRequest, HealthCheckResponse, Handlers};
+pub use generated::{
+    deserialize, serialize, CapabilityConfiguration, Handlers, HealthCheckRequest,
+    HealthCheckResponse,
+};
 
 impl HealthCheckResponse {
     pub fn healthy() -> HealthCheckResponse {
         HealthCheckResponse {
             healthy: true,
-            message: "".to_string()
+            message: "".to_string(),
         }
     }
 }
