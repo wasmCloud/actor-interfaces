@@ -3,12 +3,10 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-
 extern crate wapc_guest as guest;
 use guest::prelude::*;
 
-
-/// The abstraction of the key-value host capability 
+/// The abstraction of the key-value host capability
 pub struct Host {
     binding: String,
 }
@@ -39,7 +37,7 @@ impl Host {
         let input_args = GetArgs { key: key };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Get",
             &serialize(input_args)?,
         )
@@ -59,7 +57,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Add",
             &serialize(input_args)?,
         )
@@ -80,7 +78,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Set",
             &serialize(input_args)?,
         )
@@ -96,7 +94,7 @@ impl Host {
         let input_args = DelArgs { key: key };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Del",
             &serialize(input_args)?,
         )
@@ -107,12 +105,12 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    /// Clears the list at the given key 
+    /// Clears the list at the given key
     pub fn clear(&self, key: String) -> HandlerResult<DelResponse> {
         let input_args = ClearArgs { key: key };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Clear",
             &serialize(input_args)?,
         )
@@ -132,7 +130,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Range",
             &serialize(input_args)?,
         )
@@ -151,7 +149,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "Push",
             &serialize(input_args)?,
         )
@@ -170,7 +168,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "ListItemDelete",
             &serialize(input_args)?,
         )
@@ -189,7 +187,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "SetAdd",
             &serialize(input_args)?,
         )
@@ -208,7 +206,7 @@ impl Host {
         };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "SetRemove",
             &serialize(input_args)?,
         )
@@ -224,7 +222,7 @@ impl Host {
         let input_args = SetUnionArgs { keys: keys };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "SetUnion",
             &serialize(input_args)?,
         )
@@ -240,7 +238,7 @@ impl Host {
         let input_args = SetIntersectionArgs { keys: keys };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "SetIntersection",
             &serialize(input_args)?,
         )
@@ -256,7 +254,7 @@ impl Host {
         let input_args = SetQueryArgs { key: key };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "SetQuery",
             &serialize(input_args)?,
         )
@@ -272,7 +270,7 @@ impl Host {
         let input_args = KeyExistsArgs { key: key };
         host_call(
             &self.binding,
-            "wascc:keyvalue",
+            "wasmcloud:keyvalue",
             "KeyExists",
             &serialize(input_args)?,
         )
@@ -283,7 +281,6 @@ impl Host {
         .map_err(|e| e.into())
     }
 }
-
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct GetArgs {

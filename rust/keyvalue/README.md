@@ -1,11 +1,10 @@
-# waSCC Key Value Store Interface
+# wasmCloud Key Value Store Interface
 
 This crate provides an interface for actors to use to communicate with a key-value
-store capability provider. Actors using this interface must have the `wascc:key_value` capability
+store capability provider. Actors using this interface must have the `wasmcloud:keyvalue` capability
 permission.
 
-This crate is _one-way_, and only supports actors making calls to the host. The capability provider
-does not deliver messages to actors.
+This crate is _one-way_, and only supports actors making calls to the host. The capability provider does not deliver messages to actors (e.g. actors cannot subscribe to store change events).
 
 The following is an example usage:
 
@@ -14,6 +13,7 @@ The following is an example usage:
 extern crate serde_json;
 extern crate actor_http_server as http;
 extern crate actor_keyvalue as kv;
+
 use http::{self, Request, Response};
 use wascap_guest::HandlerResult;
 
