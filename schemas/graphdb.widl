@@ -1,0 +1,16 @@
+namespace "wasmcloud:graphdb"
+
+interface {
+	QueryGraph(query: string, graph_name: string): QueryResponse
+	DeleteGraph(graph_name: string): DeleteResponse
+}
+
+type QueryResponse {
+	data: bytes
+	statistics: [string]
+}
+
+type DeleteResponse {
+	success: bool
+}
+
