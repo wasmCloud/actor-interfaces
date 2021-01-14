@@ -14,5 +14,5 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. C
 | [Key-Value Store](./schemas/keyvalue.widl) | [✅](./rust/keyvalue/README.md) | ⛔ | ⛔ |
 | [Messaging](./schemas/messaging.widl) | [✅](./rust/messaging/README.md) | ⛔ | ⛔ |
 | [Telnet](./schemas/telnet.widl) | [✅](./rust/telnet/README.md) | ⛔ | ⛔ |
-| [ GraphDB](./schemas/graphdb.widl) | [✅](./rust/grahdb/README.md) | ⛔ | ⛔ |
-
+| [ GraphDB](./schemas/graphdb.widl) | [✅](./rust/graphdb/README.md) | ⛔ | ⛔ |
+| [Blob Store](./schemas/blobstore.widl) | [✅](./rust/blobstore/README.md) | ⛔ | ⛔ |
