@@ -3,14 +3,18 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
 /// The abstraction of the key-value host capability
+#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
 
+#[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
         Host {
@@ -20,6 +24,7 @@ impl Default for Host {
 }
 
 /// Creates a named host binding for the key-value store capability
+#[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
@@ -27,10 +32,12 @@ pub fn host(binding: &str) -> Host {
 }
 
 /// Creates the default host binding for the key-value store capability
+#[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
 }
 
+#[cfg(feature = "guest")]
 impl Host {
     /// Retrieves a value stored in a given key
     pub fn get(&self, key: String) -> HandlerResult<GetResponse> {
