@@ -4,16 +4,22 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 extern crate log;
+
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
+#[cfg(feature = "guest")]
 use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
 use std::sync::RwLock;
 
 /// Used to register core message handlers
 pub struct Handlers {}
 
 impl Handlers {
+    #[cfg(feature = "guest")]
     pub fn register_health_request(
         f: fn(HealthCheckRequest) -> HandlerResult<HealthCheckResponse>,
     ) {
@@ -22,11 +28,13 @@ impl Handlers {
     }
 }
 
+#[cfg(feature = "guest")]
 lazy_static! {
     static ref HEALTH_REQUEST: RwLock<Option<fn(HealthCheckRequest) -> HandlerResult<HealthCheckResponse>>> =
         RwLock::new(None);
 }
 
+#[cfg(feature = "guest")]
 fn health_request_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<HealthCheckRequest>(input_payload)?;
     let lock = HEALTH_REQUEST.read().unwrap().unwrap();
