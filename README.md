@@ -6,7 +6,7 @@ In this repository you'll find reusable packages/modules that are intended to be
 Here is a list of the interfaces you can find in this repository. Click the green check mark for the supported interface you're interested in.
 
 | Interface | 🦀 Rust | TinyGo | AssemblyScript |
-| -- | -- | -- |
+| --- | --- | --- |
 | [HTTP Server](./schemas/http.widl) | [✅](./rust/http-server/README.md) | ⛔ | ⛔ |
 
 
