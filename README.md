@@ -16,3 +16,5 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. C
 | [Telnet](./schemas/telnet.widl) | [✅](./rust/telnet/README.md) | ⛔ | ⛔ |
 | [ GraphDB](./schemas/graphdb.widl) | [✅](./rust/graphdb/README.md) | ⛔ | ⛔ |
 | [Blob Store](./schemas/blobstore.widl) | [✅](./rust/blobstore/README.md) | ⛔ | ⛔ |
+| [Event Streams](./schemas/eventstreams.widl) | [✅](./rust/eventstreams/README.md) | ⛔ | ⛔ |
+| [Logging](./schemas/logging.widl) | [✅](./rust/logging/README.md) | ⛔ | ⛔ |
