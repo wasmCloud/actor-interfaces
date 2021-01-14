@@ -35,15 +35,15 @@ pub fn default() -> Host {
 }
 
 impl Host {
-    pub fn query(&self, query: String, graph_name: String) -> HandlerResult<QueryResponse> {
-        let input_args = QueryArgs {
+    pub fn query_graph(&self, query: String, graph_name: String) -> HandlerResult<QueryResponse> {
+        let input_args = QueryGraphArgs {
             query: query,
             graph_name: graph_name,
         };
         host_call(
             &self.binding,
             "wasmcloud:graphdb",
-            "Query",
+            "QueryGraph",
             &serialize(input_args)?,
         )
         .map(|vec| {
@@ -53,14 +53,14 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    pub fn delete(&self, graph_name: String) -> HandlerResult<DeleteResponse> {
-        let input_args = DeleteArgs {
+    pub fn delete_graph(&self, graph_name: String) -> HandlerResult<DeleteResponse> {
+        let input_args = DeleteGraphArgs {
             graph_name: graph_name,
         };
         host_call(
             &self.binding,
             "wasmcloud:graphdb",
-            "Delete",
+            "DeleteGraph",
             &serialize(input_args)?,
         )
         .map(|vec| {
@@ -74,39 +74,39 @@ impl Host {
 pub struct Handlers {}
 
 impl Handlers {
-    pub fn register_query(f: fn(String, String) -> HandlerResult<QueryResponse>) {
-        *QUERY.write().unwrap() = Some(f);
-        register_function(&"Query", query_wrapper);
+    pub fn register_query_graph(f: fn(String, String) -> HandlerResult<QueryResponse>) {
+        *QUERY_GRAPH.write().unwrap() = Some(f);
+        register_function(&"QueryGraph", query_graph_wrapper);
     }
-    pub fn register_delete(f: fn(String) -> HandlerResult<DeleteResponse>) {
-        *DELETE.write().unwrap() = Some(f);
-        register_function(&"Delete", delete_wrapper);
+    pub fn register_delete_graph(f: fn(String) -> HandlerResult<DeleteResponse>) {
+        *DELETE_GRAPH.write().unwrap() = Some(f);
+        register_function(&"DeleteGraph", delete_graph_wrapper);
     }
 }
 
 lazy_static! {
-    static ref QUERY: RwLock<Option<fn(String, String) -> HandlerResult<QueryResponse>>> =
+    static ref QUERY_GRAPH: RwLock<Option<fn(String, String) -> HandlerResult<QueryResponse>>> =
         RwLock::new(None);
-    static ref DELETE: RwLock<Option<fn(String) -> HandlerResult<DeleteResponse>>> =
+    static ref DELETE_GRAPH: RwLock<Option<fn(String) -> HandlerResult<DeleteResponse>>> =
         RwLock::new(None);
 }
 
-fn query_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<QueryArgs>(input_payload)?;
-    let lock = QUERY.read().unwrap().unwrap();
+fn query_graph_wrapper(input_payload: &[u8]) -> CallResult {
+    let input = deserialize::<QueryGraphArgs>(input_payload)?;
+    let lock = QUERY_GRAPH.read().unwrap().unwrap();
     let result = lock(input.query, input.graph_name)?;
     Ok(serialize(result)?)
 }
 
-fn delete_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<DeleteArgs>(input_payload)?;
-    let lock = DELETE.read().unwrap().unwrap();
+fn delete_graph_wrapper(input_payload: &[u8]) -> CallResult {
+    let input = deserialize::<DeleteGraphArgs>(input_payload)?;
+    let lock = DELETE_GRAPH.read().unwrap().unwrap();
     let result = lock(input.graph_name)?;
     Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct QueryArgs {
+pub struct QueryGraphArgs {
     #[serde(rename = "query")]
     pub query: String,
     #[serde(rename = "graph_name")]
@@ -114,7 +114,7 @@ pub struct QueryArgs {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct DeleteArgs {
+pub struct DeleteGraphArgs {
     #[serde(rename = "graph_name")]
     pub graph_name: String,
 }
@@ -132,6 +132,53 @@ pub struct QueryResponse {
 pub struct DeleteResponse {
     #[serde(rename = "success")]
     pub success: bool,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct ResultSet {
+    #[serde(rename = "columns")]
+    pub columns: Vec<Column>,
+    #[serde(rename = "statistics")]
+    pub statistics: Vec<String>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct Column {
+    #[serde(rename = "scalars")]
+    pub scalars: Vec<Scalar>,
+    #[serde(rename = "nodes")]
+    pub nodes: Vec<Node>,
+    #[serde(rename = "relations")]
+    pub relations: Vec<Relation>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct Scalar {
+    #[serde(rename = "boolValue")]
+    pub bool_value: Option<bool>,
+    #[serde(rename = "intValue")]
+    pub int_value: Option<i64>,
+    #[serde(rename = "doubleValue")]
+    pub double_value: Option<f64>,
+    #[serde(with = "serde_bytes")]
+    #[serde(rename = "stringValue")]
+    pub string_value: Option<Vec<u8>>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct Node {
+    #[serde(rename = "labels")]
+    pub labels: Vec<String>,
+    #[serde(rename = "properties")]
+    pub properties: std::collections::HashMap<String, Scalar>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct Relation {
+    #[serde(rename = "type_name")]
+    pub type_name: String,
+    #[serde(rename = "properties")]
+    pub properties: std::collections::HashMap<String, Scalar>,
 }
 
 /// The standard function for serializing codec structs into a format that can be

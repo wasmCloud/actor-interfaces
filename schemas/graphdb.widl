@@ -14,3 +14,30 @@ type DeleteResponse {
 	success: bool
 }
 
+type ResultSet {
+	columns: [Column]
+	statistics: [string]
+}
+
+type Column {
+	scalars: [Scalar]
+	nodes: [Node]
+	relations: [Relation]
+}
+
+type Scalar {
+	boolValue: bool?
+	intValue: i64?
+	doubleValue: f64?
+	stringValue: bytes?
+}
+
+type Node {
+	labels: [string]
+	properties: {string:Scalar}
+}
+
+type Relation {
+	type_name: string
+	properties: {string:Scalar}	
+}
