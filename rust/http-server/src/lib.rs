@@ -1,7 +1,7 @@
 #![doc(html_logo_url = "https://avatars2.githubusercontent.com/u/52050279?s=200&v=4")]
-//! # HTTP Server waSCC Actor Interface
+//! # HTTP Server wasmCloud Actor Interface
 //!
-//! This crate provides waSCC actors with an interface to the HTTP Server capability provider. Actors using this
+//! This crate provides wasmCloud actors with an interface to the HTTP Server capability provider. Actors using this
 //! interface must have the claim `wascc:http_server` in order to have permission to handle requests, and they
 //! must have an active, configured binding to an HTTP Server capability provider.
 //!

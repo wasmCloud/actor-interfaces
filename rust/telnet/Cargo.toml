@@ -1,0 +1,23 @@
+[package]
+name = "actor-telnet"
+version = "0.1.0"
+edition = "2018"
+description = "Actor interface for the wasmCloud telnet capability provider"
+authors = ["wasmCloud Team"]
+license = "Apache-2.0"
+documentation = "https://docs.rs/actor-telnet"
+readme = "README.md"
+keywords = ["webassembly", "wasm", "telnet", "actor"]
+categories = ["wasm", "api-bindings"]
+
+[dependencies]
+wapc-guest = "0.4.0"
+rmp-serde = "0.15.1"
+serde = { version = "1.0.119" , features = ["derive"] }
+log = { version="0.4.13", features =["std","serde"]}
+lazy_static = "1.4.0"
+
+[profile.release]
+# Optimize for small code size
+opt-level = "s"
+lto = true
