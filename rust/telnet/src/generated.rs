@@ -3,16 +3,22 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
+#[cfg(feature = "guest")]
 use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
 use std::sync::RwLock;
 
+#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
 
+#[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
         Host {
@@ -22,6 +28,7 @@ impl Default for Host {
 }
 
 /// Creates a named host binding for the key-value store capability
+#[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
@@ -29,44 +36,13 @@ pub fn host(binding: &str) -> Host {
 }
 
 /// Creates the default host binding for the key-value store capability
+#[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
 }
 
+#[cfg(feature = "guest")]
 impl Host {
-    /*pub fn session_started(&self, session: String) -> HandlerResult<bool> {
-        let input_args = SessionStartedArgs { session: session };
-        host_call(
-            &self.binding,
-            "wasmcloud:telnet",
-            "SessionStarted",
-            &serialize(input_args)?,
-        )
-        .map(|vec| {
-            let resp = deserialize::<bool>(vec.as_ref()).unwrap();
-            resp
-        })
-        .map_err(|e| e.into())
-    }
-
-    pub fn receive_text(&self, session: String, text: String) -> HandlerResult<bool> {
-        let input_args = ReceiveTextArgs {
-            session: session,
-            text: text,
-        };
-        host_call(
-            &self.binding,
-            "wasmcloud:telnet",
-            "ReceiveText",
-            &serialize(input_args)?,
-        )
-        .map(|vec| {
-            let resp = deserialize::<bool>(vec.as_ref()).unwrap();
-            resp
-        })
-        .map_err(|e| e.into())
-    } */
-
     /// Sends a string of text to a given session. The provider is not responsible for
     /// indicating if this is a valid session or not. The telnet provider will not automatically
     /// add newlines or carriage returns.
@@ -89,8 +65,10 @@ impl Host {
     }
 }
 
+#[cfg(feature = "guest")]
 pub struct Handlers {}
 
+#[cfg(feature = "guest")]
 impl Handlers {
     pub fn register_session_started(f: fn(String) -> HandlerResult<bool>) {
         *SESSION_STARTED.write().unwrap() = Some(f);
@@ -100,13 +78,9 @@ impl Handlers {
         *RECEIVE_TEXT.write().unwrap() = Some(f);
         register_function(&"ReceiveText", receive_text_wrapper);
     }
-    // This is not a valid handler , the provider doesn't support it.
-    //pub fn register_send_text(f: fn(String, String) -> HandlerResult<bool>) {
-    //*SEND_TEXT.write().unwrap() = Some(f);
-    //register_function(&"SendText", send_text_wrapper);
-    //}
 }
 
+#[cfg(feature = "guest")]
 lazy_static! {
     static ref SESSION_STARTED: RwLock<Option<fn(String) -> HandlerResult<bool>>> =
         RwLock::new(None);
@@ -116,6 +90,7 @@ lazy_static! {
         RwLock::new(None);
 }
 
+#[cfg(feature = "guest")]
 fn session_started_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<SessionStartedArgs>(input_payload)?;
     let lock = SESSION_STARTED.read().unwrap().unwrap();
@@ -123,6 +98,7 @@ fn session_started_wrapper(input_payload: &[u8]) -> CallResult {
     Ok(serialize(result)?)
 }
 
+#[cfg(feature = "guest")]
 fn receive_text_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<ReceiveTextArgs>(input_payload)?;
     let lock = RECEIVE_TEXT.read().unwrap().unwrap();
@@ -130,6 +106,7 @@ fn receive_text_wrapper(input_payload: &[u8]) -> CallResult {
     Ok(serialize(result)?)
 }
 
+#[cfg(feature = "guest")]
 fn send_text_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<SendTextArgs>(input_payload)?;
     let lock = SEND_TEXT.read().unwrap().unwrap();
