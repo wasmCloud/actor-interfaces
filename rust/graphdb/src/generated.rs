@@ -4,16 +4,22 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 extern crate log;
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
+#[cfg(feature = "guest")]
 use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
 use std::sync::RwLock;
 
+#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
 
+#[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
         Host {
@@ -23,6 +29,7 @@ impl Default for Host {
 }
 
 /// Creates a named host binding
+#[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
@@ -30,10 +37,12 @@ pub fn host(binding: &str) -> Host {
 }
 
 /// Creates the default host binding
+#[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
 }
 
+#[cfg(feature = "guest")]
 impl Host {
     pub fn query_graph(&self, query: String, graph_name: String) -> HandlerResult<QueryResponse> {
         let input_args = QueryGraphArgs {
@@ -71,8 +80,10 @@ impl Host {
     }
 }
 
+#[cfg(feature = "guest")]
 pub struct Handlers {}
 
+#[cfg(feature = "guest")]
 impl Handlers {
     pub fn register_query_graph(f: fn(String, String) -> HandlerResult<QueryResponse>) {
         *QUERY_GRAPH.write().unwrap() = Some(f);
@@ -84,6 +95,7 @@ impl Handlers {
     }
 }
 
+#[cfg(feature = "guest")]
 lazy_static! {
     static ref QUERY_GRAPH: RwLock<Option<fn(String, String) -> HandlerResult<QueryResponse>>> =
         RwLock::new(None);
@@ -91,6 +103,7 @@ lazy_static! {
         RwLock::new(None);
 }
 
+#[cfg(feature = "guest")]
 fn query_graph_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<QueryGraphArgs>(input_payload)?;
     let lock = QUERY_GRAPH.read().unwrap().unwrap();
@@ -98,6 +111,7 @@ fn query_graph_wrapper(input_payload: &[u8]) -> CallResult {
     Ok(serialize(result)?)
 }
 
+#[cfg(feature = "guest")]
 fn delete_graph_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<DeleteGraphArgs>(input_payload)?;
     let lock = DELETE_GRAPH.read().unwrap().unwrap();
