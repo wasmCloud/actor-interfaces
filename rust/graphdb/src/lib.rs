@@ -23,3 +23,8 @@
 pub mod generated;
 #[allow(unused_imports)]
 use generated::*;
+
+/// The operation to request a query of graph data
+pub const OP_QUERY: &str = "QueryGraph";
+/// The operation to request the deletion of a graph
+pub const OP_DELETE: &str = "DeleteGraph";
