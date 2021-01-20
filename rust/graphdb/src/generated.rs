@@ -174,9 +174,8 @@ pub struct Scalar {
     pub int_value: Option<i64>,
     #[serde(rename = "doubleValue")]
     pub double_value: Option<f64>,
-    #[serde(with = "serde_bytes")]
     #[serde(rename = "stringValue")]
-    pub string_value: Option<Vec<u8>>,
+    pub string_value: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
