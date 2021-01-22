@@ -4,16 +4,21 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 extern crate log;
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
+#[cfg(feature = "guest")]
 use lazy_static::lazy_static;
 use std::sync::RwLock;
 
+#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
 
+#[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
         Host {
@@ -23,6 +28,7 @@ impl Default for Host {
 }
 
 /// Creates a named host binding
+#[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
@@ -30,10 +36,12 @@ pub fn host(binding: &str) -> Host {
 }
 
 /// Creates the default host binding
+#[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
 }
 
+#[cfg(feature = "guest")]
 impl Host {
     pub fn write_log(&self, request: WriteLogRequest) -> HandlerResult<()> {
         let input_args = WriteLogArgs { request: request };
@@ -48,8 +56,10 @@ impl Host {
     }
 }
 
+#[cfg(feature = "guest")]
 pub struct Handlers {}
 
+#[cfg(feature = "guest")]
 impl Handlers {
     pub fn register_write_log(f: fn(WriteLogRequest) -> HandlerResult<()>) {
         *WRITE_LOG.write().unwrap() = Some(f);
@@ -57,11 +67,13 @@ impl Handlers {
     }
 }
 
+#[cfg(feature = "guest")]
 lazy_static! {
     static ref WRITE_LOG: RwLock<Option<fn(WriteLogRequest) -> HandlerResult<()>>> =
         RwLock::new(None);
 }
 
+#[cfg(feature = "guest")]
 fn write_log_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<WriteLogArgs>(input_payload)?;
     let lock = WRITE_LOG.read().unwrap().unwrap();
