@@ -1,0 +1,35 @@
+[package]
+name = "actor-blobstore"
+version = "0.1.0"
+authors = ["wasmCloud Team"]
+edition = "2018"
+description = "Interface to the blobstore contract for use by wasmCloud Actors"
+license = "Apache-2.0"
+documentation = "https://docs.rs/actor-blobstore"
+readme = "README.md"
+keywords = ["wasm", "wasmcloud", "actor", "events"]
+categories = ["wasm", "api-bindings"]
+
+[features]
+guest = ["wapc-guest", "lazy_static"]
+
+[dependencies]
+wapc-guest = { version = "0.4.0", optional = true }
+lazy_static = { version = "1.4.0", optional = true }
+
+serde = { version = "1.0.115" , features = ["derive"] }
+serde_json = "1.0.57"
+serde_derive = "1.0.115"
+serde_bytes = "0.11.5"
+rmp-serde = "0.14.4"
+log = { version="0.4.11", features =["std","serde"]}
+
+[dev-dependencies]
+structopt = "0.3.17"
+serde_json = "1.0.57"
+base64 = "0.12.3"
+
+[profile.release]
+# Optimize for small code size
+opt-level = "s"
+lto = true
