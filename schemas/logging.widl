@@ -1,0 +1,11 @@
+namespace "wasmcloud:logging"
+
+interface {
+  WriteLog(request: WriteLogRequest): void 
+}
+
+type WriteLogRequest {
+  level: u8
+  body: string
+  actor: string?
+}
