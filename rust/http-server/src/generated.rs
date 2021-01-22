@@ -4,18 +4,24 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 extern crate log;
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
+#[cfg(feature = "guest")]
 use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
 use std::sync::RwLock;
 
 /// Used for making calls from the actor to the host. There are no supported
 /// host calls for this capability provider
+#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
 
+#[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
         Host {
@@ -25,6 +31,7 @@ impl Default for Host {
 }
 
 /// Requests a host abstraction for a given binding name
+#[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
@@ -32,15 +39,17 @@ pub fn host(binding: &str) -> Host {
 }
 
 /// Requests the default host abstraction
+#[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
 }
 
+#[cfg(feature = "guest")]
 impl Host {
     pub fn handle_request(&self, request: Request) -> HandlerResult<Response> {
         host_call(
             &self.binding,
-            "wascc:http_server",
+            "wasmcloud:httpserver",
             "HandleRequest",
             &serialize(request)?,
         )
@@ -53,8 +62,10 @@ impl Host {
 }
 
 /// Used to register message handlers in the actor
+#[cfg(feature = "guest")]
 pub struct Handlers {}
 
+#[cfg(feature = "guest")]
 impl Handlers {
     /// Registers a request handler for the [Request](struct.Request.html) type
     pub fn register_handle_request(f: fn(Request) -> HandlerResult<Response>) {
@@ -63,11 +74,13 @@ impl Handlers {
     }
 }
 
+#[cfg(feature = "guest")]
 lazy_static! {
     static ref HANDLE_REQUEST: RwLock<Option<fn(Request) -> HandlerResult<Response>>> =
         RwLock::new(None);
 }
 
+#[cfg(feature = "guest")]
 fn handle_request_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<Request>(input_payload)?;
     let lock = HANDLE_REQUEST.read().unwrap().unwrap();
