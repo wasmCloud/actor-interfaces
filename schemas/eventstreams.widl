@@ -1,0 +1,24 @@
+namespace "wasmcloud:eventstreams"
+
+interface {    
+    DeliverEvent{event: Event}: bool
+    WriteEvent(stream_id: string, values: {string: string}): string
+    QueryStream{query: StreamQuery}: [Event]
+}
+
+type Event {
+    eventId: string
+    streamId: string
+    values: {string: string}
+}
+
+type StreamQuery {
+    streamId: string
+    range: TimeRange?
+    count: u64
+}
+
+type TimeRange {
+    minTime: u64
+    maxTime: u64
+}
