@@ -82,6 +82,20 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
+
+    pub fn deliver_message(&self, message: BrokerMessage) -> HandlerResult<BrokerMessage> {
+        host_call(
+            &self.binding,
+            "wascc:messaging",
+            "DeliverMessage",
+            &serialize(message)?,
+        )
+        .map(|vec| {
+            let resp = deserialize::<BrokerMessage>(vec.as_ref()).unwrap();
+            resp
+        })
+        .map_err(|e| e.into())
+    }
 }
 
 pub struct Handlers {}
@@ -95,12 +109,18 @@ impl Handlers {
         *REQUEST.write().unwrap() = Some(f);
         register_function(&"Request", request_wrapper);
     }
+    pub fn register_deliver_message(f: fn(BrokerMessage) -> HandlerResult<BrokerMessage>) {
+        *DELIVER_MESSAGE.write().unwrap() = Some(f);
+        register_function(&"DeliverMessage", deliver_message_wrapper);
+    }
 }
 
 lazy_static! {
     static ref PUBLISH: RwLock<Option<fn(String, String, Vec<u8>) -> HandlerResult<PublishResponse>>> =
         RwLock::new(None);
     static ref REQUEST: RwLock<Option<fn(String, Vec<u8>, i64) -> HandlerResult<BrokerMessage>>> =
+        RwLock::new(None);
+    static ref DELIVER_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<BrokerMessage>>> =
         RwLock::new(None);
 }
 
@@ -115,6 +135,13 @@ fn request_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<RequestArgs>(input_payload)?;
     let lock = REQUEST.read().unwrap().unwrap();
     let result = lock(input.subject, input.body, input.timeout)?;
+    Ok(serialize(result)?)
+}
+
+fn deliver_message_wrapper(input_payload: &[u8]) -> CallResult {
+    let input = deserialize::<BrokerMessage>(input_payload)?;
+    let lock = DELIVER_MESSAGE.read().unwrap().unwrap();
+    let result = lock(input)?;
     Ok(serialize(result)?)
 }
 

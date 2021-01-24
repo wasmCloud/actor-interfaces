@@ -3,7 +3,7 @@ namespace "wascc:messaging"
 interface {    
     Publish(subject: string, reply_to: string, body: bytes): PublishResponse
     Request(subject: string, body: bytes, timeout: i64): BrokerMessage
-    DeliverMessage{message: BrokerMessage}
+    DeliverMessage{message: BrokerMessage}: BrokerMessage
 }
 
 type PublishResponse {
