@@ -11,7 +11,7 @@ import {
 export class Host {
   binding: string;
 
-  constructor(binding: string) {
+  constructor(binding: string = "default") {
     this.binding = binding;
   }
 

@@ -40,7 +40,7 @@ impl Host {
     pub fn handle_request(&self, request: Request) -> HandlerResult<Response> {
         host_call(
             &self.binding,
-            "wascc:http_server",
+            "wasmcloud:httpserver",
             "HandleRequest",
             &serialize(request)?,
         )

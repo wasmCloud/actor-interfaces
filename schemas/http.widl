@@ -1,4 +1,4 @@
-namespace "wascc:http_server"
+namespace "wasmcloud:httpserver"
 
 interface {
   HandleRequest{request: Request}: Response

@@ -11,14 +11,14 @@ import {
 export class Host {
   binding: string;
 
-  constructor(binding: string) {
+  constructor(binding: string = "default") {
     this.binding = binding;
   }
 
   HandleRequest(request: Request): Response {
     const payload = hostCall(
       this.binding,
-      "wasmcloud:http_server",
+      "wasmcloud:httpserver",
       "HandleRequest",
       request.toBuffer()
     );
