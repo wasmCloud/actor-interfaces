@@ -26,6 +26,8 @@ serde_bytes = "0.11.5"
 rmp-serde = "0.14.4"
 log = { version="0.4.11", features =["std","serde"]}
 lazy_static = "1.4.0"
+actor-core = { git = "https://github.com/wasmCloud/actor-interfaces", branch = "main"}
+wascc-actor = "0.7.4"
 
 [dev-dependencies]
 structopt = "0.3.17"
