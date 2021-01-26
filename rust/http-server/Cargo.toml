@@ -10,15 +10,18 @@ readme = "README.md"
 keywords = ["webassembly", "wasm", "wascc", "actor"]
 categories = ["wasm", "api-bindings"]
 
+[features]
+guest = ["wapc-guest", "lazy_static"]
+
 [dependencies]
-wapc-guest = "0.4.0"
+wapc-guest = { version = "0.4.0", optional = true}
+lazy_static = { version = "1.4.0", optional = true}
 serde = { version = "1.0.119" , features = ["derive"] }
 serde_json = "1.0.61"
 serde_derive = "1.0.119"
 serde_bytes = "0.11.5"
 rmp-serde = "0.15.1"
 log = { version="0.4.13", features =["std","serde"]}
-lazy_static = "1.4.0"
 
 [profile.release]
 # Optimize for small code size
