@@ -1,6 +1,6 @@
 {
   "name": "@wasmcloud/actor-http-server",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Interface to the key-value contract for use by wasmCloud Actors",
   "author": "wasmCloud Team",
   "scripts": {

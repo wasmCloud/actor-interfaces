@@ -1,8 +1,8 @@
 {
-  "name": "actor-core",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "@wasmcloud/actor-core",
+  "version": "0.1.1",
+  "description": "wasmCloud Core Actor Interface",
+  "author": "wasmCloud Team",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "asc assembly/index.ts -b build/actor-core.wasm --use abort=assembly/index/abort --optimize"
