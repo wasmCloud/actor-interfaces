@@ -3,21 +3,6 @@
  * All wasmCloud actors must respond to the core health request message.
  */
 
-// import {
-//   CapabilityConfiguration,
-//   HealthCheckRequest,
-//   HealthCheckResponse,
-//   Handlers,
-// } from "./module";
-
-// export function wapc_init(): void {
-//   Handlers.registerHealthRequest(HealthRequest);
-// }
-
-// function HealthRequest(request: HealthCheckRequest): HealthCheckResponse {
-//   return new HealthCheckResponse(); // TODO: Provide implementation.
-// }
-
 // Boilerplate code for waPC.  Do not remove.
 import { handleCall, handleAbort } from "@wapc/as-guest";
 
