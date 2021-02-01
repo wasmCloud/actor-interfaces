@@ -12,7 +12,9 @@ pub fn num_columns(rs: &ResultSet) -> usize {
 /// Returns the number of rows in the result set.
 pub fn num_rows(rs: &ResultSet) -> usize {
     if let Some(col) = rs.columns.get(0) {
-        col.scalars.len() + col.relations.len() + col.nodes.len()
+        col.scalars.as_ref().unwrap_or(&vec![]).len()
+            + col.relations.as_ref().unwrap_or(&vec![]).len()
+            + col.nodes.as_ref().unwrap_or(&vec![]).len()
     } else {
         0
     }
@@ -22,12 +24,12 @@ pub fn num_rows(rs: &ResultSet) -> usize {
 ///
 /// Returns an error if the value at the given position is not a scalar
 /// or if the position is out of bounds.
-pub fn get_scalar(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<&Scalar> {
+pub fn get_scalar(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<Scalar> {
     match rs.columns.get(column_idx) {
-            Some(column) => match column.scalars.get(row_idx) {
-                Some(scalar) => Ok(scalar),
+            Some(column) => match column.scalars.as_ref().unwrap_or(&vec![]).get(row_idx) {
+                Some(scalar) => Ok(scalar.clone()),
                 None => client_type_error!(
-                    "failed to get scalar: row index out of bounds: the len is {:?} but the index is {:?}", column.scalars.len(), row_idx,
+                    "failed to get scalar: row index out of bounds: the len is {:?} but the index is {:?}", column.scalars.as_ref().unwrap_or(&vec![]).len(), row_idx,
                 ),
             },
             None => client_type_error!(
@@ -40,12 +42,12 @@ pub fn get_scalar(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphRes
 ///
 /// Returns an error if the value at the given position is not a node
 /// or if the position is out of bounds.
-pub fn get_node(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<&Node> {
+pub fn get_node(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<Node> {
     match rs.columns.get(column_idx) {
-            Some(column) => match column.nodes.get(row_idx) {
-                Some(node) => Ok(node),
+            Some(column) => match column.nodes.as_ref().unwrap_or(&vec![]).get(row_idx) {
+                Some(node) => Ok(node.clone()),
                 None => client_type_error!(
-                    "failed to get node: row index out of bounds: the len is {:?} but the index is {:?}", column.nodes.len(), row_idx,
+                    "failed to get node: row index out of bounds: the len is {:?} but the index is {:?}", column.nodes.as_ref().unwrap_or(&vec![]).len(), row_idx,
                 ),
             },
             None => client_type_error!(
@@ -58,18 +60,18 @@ pub fn get_node(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResul
 ///
 /// Returns an error if the value at the given position is not a relation
 /// or if the position is out of bounds.
-pub fn get_relation(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<&Relation> {
+pub fn get_relation(rs: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<Relation> {
     match rs.columns.get(column_idx) {
-            Some(column) => match column.relations.get(row_idx) {
-                Some(relation) => Ok(relation),
-                None => client_type_error!(
-                    "failed to get relation: row index out of bounds: the len is {:?} but the index is {:?}", column.relations.len(), row_idx,
-                ),
-            },
+        Some(column) => match column.relations.as_ref().unwrap_or(&vec![]).get(row_idx) {
+            Some(relation) => Ok(relation.clone()),
             None => client_type_error!(
-                "failed to get relation: column index out of bounds: the len is {:?} but the index is {:?}", rs.columns.len(), column_idx,
+                "failed to get relation: row index out of bounds: the len is {:?} but the index is {:?}", column.relations.as_ref().unwrap_or(&vec![]).len(), row_idx,
             ),
-        }
+        },
+        None => client_type_error!(
+            "failed to get relation: column index out of bounds: the len is {:?} but the index is {:?}", rs.columns.len(), column_idx,
+        ),
+    }
 }
 
 impl FromTable for ResultSet {
@@ -88,6 +90,12 @@ impl<T: FromRow> FromTable for Vec<T> {
         }
 
         Ok(ret)
+    }
+}
+
+impl FromTable for () {
+    fn from_table(result_set: &ResultSet) -> GraphResult<Self> {
+        Ok(())
     }
 }
 
@@ -163,6 +171,7 @@ impl<T: FromRow> FromTable for T {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::generated::*;
 
     // Verifies that we can extract the tuples we expect from the raw ResultSet
     // structure and that the various return types are automatically converted
@@ -205,24 +214,24 @@ mod test {
             statistics: vec![],
             columns: vec![
                 Column {
-                    scalars: vec![Scalar {
+                    scalars: Some(vec![Scalar {
                         bool_value: None,
                         double_value: None,
                         int_value: None,
                         string_value: Some("tester".to_string()),
-                    }],
-                    nodes: vec![],
-                    relations: vec![],
+                    }]),
+                    nodes: Some(vec![]),
+                    relations: Some(vec![]),
                 },
                 Column {
-                    scalars: vec![Scalar {
+                    scalars: Some(vec![Scalar {
                         bool_value: None,
                         double_value: None,
                         int_value: Some(1985),
                         string_value: None,
-                    }],
-                    nodes: vec![],
-                    relations: vec![],
+                    }]),
+                    nodes: Some(vec![]),
+                    relations: Some(vec![]),
                 },
             ],
         })
@@ -233,7 +242,7 @@ mod test {
             statistics: vec![],
             columns: vec![
                 Column {
-                    scalars: vec![
+                    scalars: Some(vec![
                         Scalar {
                             bool_value: None,
                             double_value: None,
@@ -246,12 +255,12 @@ mod test {
                             int_value: None,
                             string_value: Some("test2".to_string()),
                         },
-                    ],
-                    nodes: vec![],
-                    relations: vec![],
+                    ]),
+                    nodes: Some(vec![]),
+                    relations: Some(vec![]),
                 },
                 Column {
-                    scalars: vec![
+                    scalars: Some(vec![
                         Scalar {
                             bool_value: None,
                             double_value: None,
@@ -264,9 +273,9 @@ mod test {
                             int_value: Some(1986),
                             string_value: None,
                         },
-                    ],
-                    nodes: vec![],
-                    relations: vec![],
+                    ]),
+                    nodes: Some(vec![]),
+                    relations: Some(vec![]),
                 },
             ],
         })

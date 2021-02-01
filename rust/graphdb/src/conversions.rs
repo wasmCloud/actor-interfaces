@@ -99,13 +99,6 @@ impl FromCell for String {
     }
 }
 
-// impl FromCell for String {
-//     fn from_cell(result_set: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<Self> {
-//         let redis_string = GraphString::from_cell(result_set, row_idx, column_idx)?;
-//         String::from_utf8(redis_string.into()).map_err(|_| GraphError::InvalidUtf8)
-//     }
-// }
-
 impl FromCell for Node {
     fn from_cell(result_set: &ResultSet, row_idx: usize, column_idx: usize) -> GraphResult<Self> {
         let node = get_node(result_set, row_idx, column_idx)?;

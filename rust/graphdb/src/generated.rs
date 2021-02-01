@@ -44,10 +44,10 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub fn query_graph(&self, query: String, graph_name: String) -> HandlerResult<QueryResponse> {
+    pub(crate) fn query(&self, graphName: String, query: String) -> HandlerResult<QueryResponse> {
         let input_args = QueryGraphArgs {
+            graph_name: graphName,
             query: query,
-            graph_name: graph_name,
         };
         host_call(
             &self.binding,
@@ -62,9 +62,9 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    pub fn delete_graph(&self, graph_name: String) -> HandlerResult<DeleteResponse> {
+    pub fn delete_graph(&self, graphName: String) -> HandlerResult<DeleteResponse> {
         let input_args = DeleteGraphArgs {
-            graph_name: graph_name,
+            graph_name: graphName,
         };
         host_call(
             &self.binding,
@@ -107,7 +107,7 @@ lazy_static! {
 fn query_graph_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<QueryGraphArgs>(input_payload)?;
     let lock = QUERY_GRAPH.read().unwrap().unwrap();
-    let result = lock(input.query, input.graph_name)?;
+    let result = lock(input.graph_name, input.query)?;
     Ok(serialize(result)?)
 }
 
@@ -121,25 +121,22 @@ fn delete_graph_wrapper(input_payload: &[u8]) -> CallResult {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct QueryGraphArgs {
+    #[serde(rename = "graphName")]
+    pub graph_name: String,
     #[serde(rename = "query")]
     pub query: String,
-    #[serde(rename = "graph_name")]
-    pub graph_name: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct DeleteGraphArgs {
-    #[serde(rename = "graph_name")]
+    #[serde(rename = "graphName")]
     pub graph_name: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct QueryResponse {
-    #[serde(with = "serde_bytes")]
-    #[serde(rename = "data")]
-    pub data: Vec<u8>,
-    #[serde(rename = "statistics")]
-    pub statistics: Vec<String>,
+    #[serde(rename = "resultSet")]
+    pub result_set: ResultSet,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -159,11 +156,11 @@ pub struct ResultSet {
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Column {
     #[serde(rename = "scalars")]
-    pub scalars: Vec<Scalar>,
+    pub scalars: Option<Vec<Scalar>>,
     #[serde(rename = "nodes")]
-    pub nodes: Vec<Node>,
+    pub nodes: Option<Vec<Node>>,
     #[serde(rename = "relations")]
-    pub relations: Vec<Relation>,
+    pub relations: Option<Vec<Relation>>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -188,7 +185,7 @@ pub struct Node {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Relation {
-    #[serde(rename = "type_name")]
+    #[serde(rename = "typeName")]
     pub type_name: String,
     #[serde(rename = "properties")]
     pub properties: std::collections::HashMap<String, Scalar>,

@@ -1,13 +1,12 @@
 namespace "wasmcloud:graphdb"
 
 interface {
-	QueryGraph(query: string, graphName: string): QueryResponse
+	QueryGraph(graphName: string, query: string): QueryResponse
 	DeleteGraph(graphName: string): DeleteResponse
 }
 
 type QueryResponse {
-	data: bytes
-	statistics: [string]
+	resultSet: ResultSet
 }
 
 type DeleteResponse {
@@ -20,9 +19,9 @@ type ResultSet {
 }
 
 type Column {
-	scalars: [Scalar]
-	nodes: [Node]
-	relations: [Relation]
+	scalars: [Scalar]?
+	nodes: [Node]?
+	relations: [Relation]?
 }
 
 type Scalar {
