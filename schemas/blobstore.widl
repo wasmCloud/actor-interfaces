@@ -1,0 +1,57 @@
+namespace "wasmcloud:blobstore"
+
+interface {        
+    CreateContainer(container: Container): Container
+    RemoveContainer(container: Container): void
+    RemoveObject(blob: Blob): void
+    ListObjects(container: Container): BlobList
+    UploadChunk(chunk: FileChunk): void
+    StartDownload(request: StreamRequest): void
+    StartUpload(blob: FileChunk): void
+    ReceiveChunk(chunk: FileChunk): void
+    GetObjectInfo(blob: Blob): Blob
+}
+
+type FileChunk {
+    sequenceNo: u64,
+    container: Container,
+    id: string,
+    totalBytes: u64
+    chunkSize: u64,
+    context: string?,
+    chunkBytes: bytes
+}
+
+type Container {
+    id: string
+}
+
+type ContainerList {
+    containers: [Container]
+}
+
+type Blob {
+    id: string
+    container: Container
+    byteSize: u64
+}
+
+type BlobList {
+    blobs: [Blob]
+}
+
+type StreamRequest {
+    id: string
+    container: Container
+    chunkSize: u64
+    context: string?
+}
+
+type Transfer {
+    blobId: string
+    container: Container
+    chunkSize: u64
+    totalSize: u64
+    totalChunks: u64
+    context: string?
+}
