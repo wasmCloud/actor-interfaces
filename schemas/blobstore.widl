@@ -19,7 +19,7 @@ type FileChunk {
     totalBytes: u64
     chunkSize: u64,
     context: string?,
-    chunkBytes: bytes?
+    chunkBytes: bytes
 }
 
 type Container {

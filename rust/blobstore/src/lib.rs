@@ -8,62 +8,61 @@
 //! This generic protocol can be used to support capability providers like local blob storage,
 //! Amazon S3, Azure blob storage, Google blob storage, and more.
 //!
+//! //! Example:
+//! ```rust
+//! extern crate wapc_guest as guest;
+//! use guest::prelude::*;
+//! use actor_blobstore as blobstore;
+//! use actor_http_server as http;
+//! use actor_core::serialize;
+//! use blobstore::*;
+//! use serde_json::json;
+//! use log::{error, info};
+//!
+//! #[no_mangle]
+//! pub fn wapc_init() {
+//!     http::Handlers::register_handle_request(download_poem);
+//!     blobstore::Handlers::register_receive_chunk(handle_chunk);
+//!     actor_core::Handlers::register_health_request(health);
+//! }
+//!
+//! /// Start the download of a blob (poem). Chunks will be streamed after download begins
+//! fn download_poem(req: http::Request) -> HandlerResult<http::Response> {
+//!     let stream_request = StreamRequest {
+//!         id: req.path,
+//!         container: Container::new("photos".to_string()),
+//!         chunk_size: 4096,
+//!         context: None
+//!     };
+//!     // replace `start_download` with `blobstore::default().start_download`
+//!     match start_download(stream_request) {
+//!         Ok(_) => Ok(http::Response::ok()),
+//!         Err(_) => Err("Failed to initiate download of chunk".into())
+//!     }
+//! }
+//!
+//! /// Handle the incoming chunk as a poem "verse" and log the result
+//! /// Note that these chunks can be received out of order, so the poem
+//! /// in this case might be displayed in a different order.
+//! fn handle_chunk(chunk: FileChunk) -> HandlerResult<()> {
+//!     let verse = String::from_utf8(chunk.chunk_bytes)?;
+//!     info!("Poem {} part {}:\n{}", chunk.id, chunk.sequence_no, verse);
+//!     Ok(())
+//! }
+//!
+//! fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
+//!   Ok(actor_core::HealthCheckResponse::healthy())   
+//! }
+//!
+//! # fn start_download(req: StreamRequest) -> HandlerResult<()> {
+//! #   Ok(())
+//! # }
+//!
+//! ```
 
-// extern crate wapc_guest as guest;
-// use guest::prelude::*;
-
-// #[no_mangle]
-// pub fn wapc_init() {
-//     Handlers::register_create_container(create_container);
-//     Handlers::register_remove_container(remove_container);
-//     Handlers::register_remove_object(remove_object);
-//     Handlers::register_list_objects(list_objects);
-//     Handlers::register_upload_chunk(upload_chunk);
-//     Handlers::register_start_download(start_download);
-//     Handlers::register_start_upload(start_upload);
-//     Handlers::register_receive_chunk(receive_chunk);
-//     Handlers::register_get_object_info(get_object_info);
-// }
-
-// fn create_container(_container: Container) -> HandlerResult<Container> {
-//     Ok(Container::default()) // TODO: Provide implementation.
-// }
-
-// fn remove_container(_container: Container) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn remove_object(_blob: Blob) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn list_objects(_container: Container) -> HandlerResult<BlobList> {
-//     Ok(BlobList::default()) // TODO: Provide implementation.
-// }
-
-// fn upload_chunk(_chunk: FileChunk) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn start_download(_request: StreamRequest) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn start_upload(_blob: FileChunk) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn receive_chunk(_chunk: FileChunk) -> HandlerResult<()> {
-//     Ok(()) // TODO: Provide implementation.
-// }
-
-// fn get_object_info(_blob: Blob) -> HandlerResult<Blob> {
-//     Ok(Blob::default()) // TODO: Provide implementation.
-// }
-
-pub mod generated;
+mod generated;
 #[allow(unused_imports)]
-use generated::*;
+pub use generated::*;
 
 /// Guest sends a Container to the capability provider, receives a Container back
 pub const OP_CREATE_CONTAINER: &str = "CreateContainer";
@@ -84,3 +83,9 @@ pub const OP_START_UPLOAD: &str = "StartUpload";
 pub const OP_RECEIVE_CHUNK: &str = "ReceiveChunk";
 /// Query information on a single blob. Guest sends an incomplete blob struct and gets a complete one in return
 pub const OP_GET_OBJECT_INFO: &str = "GetObjectInfo";
+
+impl Container {
+    pub fn new(id: impl Into<String>) -> Self {
+        Container { id: id.into() }
+    }
+}

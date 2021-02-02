@@ -371,7 +371,7 @@ pub struct FileChunk {
     pub context: Option<String>,
     #[serde(with = "serde_bytes")]
     #[serde(rename = "chunkBytes")]
-    pub chunk_bytes: Option<Vec<u8>>,
+    pub chunk_bytes: Vec<u8>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
