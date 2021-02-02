@@ -1,0 +1,42 @@
+namespace "wasmcloud:graphdb"
+
+interface {
+	QueryGraph(graphName: string, query: string): QueryResponse
+	DeleteGraph(graphName: string): DeleteResponse
+}
+
+type QueryResponse {
+	resultSet: ResultSet
+}
+
+type DeleteResponse {
+	success: bool
+}
+
+type ResultSet {
+	columns: [Column]
+	statistics: [string]
+}
+
+type Column {
+	scalars: [Scalar]?
+	nodes: [Node]?
+	relations: [Relation]?
+}
+
+type Scalar {
+	boolValue: bool?
+	intValue: i64?
+	doubleValue: f64?
+	stringValue: string?
+}
+
+type Node {
+	labels: [string]
+	properties: {string:Scalar}
+}
+
+type Relation {
+	typeName: string
+	properties: {string:Scalar}	
+}
