@@ -1,11 +1,14 @@
-.PHONY: all deps codegen build clean doc test
+.PHONY: all deps build clean doc test
 
-all: deps codegen build
+#all: deps codegen build
+all: deps build
 
 deps:
 
-codegen:
-	wapc generate codegen.yaml
+# DO NOT RERUN CODEGEN
+# The generated functions have been modified
+#codegen:
+#	wapc generate codegen.yaml
 
 build:
 	cargo build --target wasm32-unknown-unknown --release
