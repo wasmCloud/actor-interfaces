@@ -1,4 +1,4 @@
-schema: ../../schemas/keyvalue.widl
+schema: ../keyvalue.widl
 generates:
   assembly/module.ts:
     package: widl-codegen/language/assemblyscript

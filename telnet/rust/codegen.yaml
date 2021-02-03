@@ -1,4 +1,4 @@
-schema: ../../schemas/telnet.widl
+schema: ../telnet.widl
 generates:
   src/generated.rs:
     package: widl-codegen/language/rust

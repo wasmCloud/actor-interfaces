@@ -1,4 +1,4 @@
-schema: ../../schemas/http.widl
+schema: ../core.widl
 generates:
   assembly/module.ts:
     package: widl-codegen/language/assemblyscript

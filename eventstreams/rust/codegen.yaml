@@ -1,4 +1,4 @@
-schema: ../../schemas/eventstreams.widl
+schema: ../eventstreams.widl
 generates:
   src/generated.rs:
     package: widl-codegen/language/rust

@@ -8,13 +8,14 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. C
 
 | Interface | 🦀 Rust | TinyGo | AssemblyScript |
 | --- | :---: | :---: | :---: |
-| [Core](./schemas/core.widl) | [✅](./rust/actor-core/README.md) |  | |
-| [HTTP Server](./schemas/http.widl) | [✅](./rust/http-server/README.md) | ⛔ | ⛔ |
-| [HTTP Client](./schemas/http.widl) | [✅](./rust/http-client/README.md) | ⛔|⛔|
-| [Key-Value Store](./schemas/keyvalue.widl) | [✅](./rust/keyvalue/README.md) | ⛔ | ⛔ |
-| [Messaging](./schemas/messaging.widl) | [✅](./rust/messaging/README.md) | ⛔ | ⛔ |
-| [Telnet](./schemas/telnet.widl) | [✅](./rust/telnet/README.md) | ⛔ | ⛔ |
-| [ GraphDB](./schemas/graphdb.widl) | [✅](./rust/graphdb/README.md) | ⛔ | ⛔ |
-| [Blob Store](./schemas/blobstore.widl) | [✅](./rust/blobstore/README.md) | ⛔ | ⛔ |
-| [Event Streams](./schemas/eventstreams.widl) | [✅](./rust/eventstreams/README.md) | ⛔ | ⛔ |
-| [Logging](./schemas/logging.widl) | [✅](./rust/logging/README.md) | ⛔ | ⛔ |
+| [Core](./actor-core/core.widl) | [✅](./actor-core/rust/README.md) | ⛔ | [✅](./actor-core/assemblyscript/README.md) |
+| [HTTP Server](./http-server/http.widl) | [✅](./http-server/rust/README.md) | ⛔ | [✅](./http-server/assemblyscript/README.md) |
+| [HTTP Client](./http-client/http_client.widl) | ⛔ | ⛔ | ⛔ |
+| [Key-Value Store](./keyvalue/keyvalue.widl) | [✅](./keyvalue/rust/README.md) | ⛔ | [✅](./keyvalue/assemblyscript/README.md) |
+| [Messaging](./messaging//messaging.widl) | [✅](./messaging/rust/README.md) | ⛔ | ⛔ |
+| [Telnet](./telnet/telnet.widl) | [✅](./telnet/rust/README.md) | ⛔ | ⛔ |
+| [GraphDB](./graphdb/graphdb.widl) | [✅](./graphdb/rust/README.md) | ⛔ | ⛔ |
+| [Blob Store](./blobstore/blobstore.widl) | [✅](./blobstore/rust/README.md) | ⛔ | ⛔ |
+| [Event Streams](./eventstreams/eventstreams.widl) | [✅](./eventstreams/rust/README.md) | ⛔ | ⛔ |
+| Logging | ⛔ | ⛔ | ⛔ |
+| [Extras](./extras/extras.widl) | [✅](./extras/rust/README.md) | ⛔ | ⛔ |

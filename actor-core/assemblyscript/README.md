@@ -4,6 +4,7 @@ Core operations for wasmCloud actors.
 All wasmCloud actors must respond to the core health request message.
 
 ## Core AssemblyScript Actor Code
+
 ```typescript
 // Boilerplate code for waPC.  Do not remove.
 import { handleCall, handleAbort } from "@wapc/as-guest";

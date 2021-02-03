@@ -1,9 +1,9 @@
-namespace "wascc:extras"
+namespace "wasmcloud:extras"
 
 interface {
-  RequestGuid{GeneratorRequest}: GeneratorResult
-  RequestRandom{GeneratorRequest}: GeneratorResult
-  RequestSequence{GeneratorRequest}: GeneratorResult
+  RequestGuid{req:GeneratorRequest}: GeneratorResult
+  RequestRandom{req:GeneratorRequest}: GeneratorResult
+  RequestSequence{req:GeneratorRequest}: GeneratorResult
 }
 
 type GeneratorResult {

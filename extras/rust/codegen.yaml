@@ -1,4 +1,4 @@
-schema: ../graphdb.widl
+schema: ../extras.widl
 generates:
   src/generated.rs:
     package: widl-codegen/language/rust

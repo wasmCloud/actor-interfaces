@@ -1,4 +1,4 @@
-schema: ../../schemas/keyvalue.widl
+schema: ../keyvalue.widl
 generates:
   src/generated.rs:
     package: widl-codegen/language/rust
