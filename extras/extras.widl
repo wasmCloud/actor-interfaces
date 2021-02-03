@@ -1,0 +1,21 @@
+namespace "wasmcloud:extras"
+
+interface {
+  RequestGuid{req:GeneratorRequest}: GeneratorResult
+  RequestRandom{req:GeneratorRequest}: GeneratorResult
+  RequestSequence{req:GeneratorRequest}: GeneratorResult
+}
+
+type GeneratorResult {
+  guid: string?
+  sequenceNumber: u64
+  random_number: u32 
+}
+
+type GeneratorRequest {
+  guid: bool
+  sequence: bool
+  random: bool
+  min: u32
+  max: u32
+}
