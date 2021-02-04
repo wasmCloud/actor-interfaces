@@ -1,4 +1,4 @@
-module github.com/myorg/mymodule
+module github.com/wasmcloud/actor-interfaces/actor-core/go
 
 go 1.15
 
