@@ -7,9 +7,9 @@ deps:
 codegen:
 	wapc generate codegen.yaml
 
-build:
-	mkdir -p build
-	tinygo build -o build/go.wasm -target wasm -no-debug pkg/main.go
+#build:
+#	mkdir -p build
+#	tinygo build -o build/go.wasm -target wasm -no-debug pkg/main.go
 
 clean:
 	rm -Rf build
@@ -17,4 +17,4 @@ clean:
 doc:
 
 test:
-	go test --count=1 ./pkg/...
+	go test --count=1 ./...

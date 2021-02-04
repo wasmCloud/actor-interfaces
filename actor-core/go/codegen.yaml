@@ -1,6 +1,6 @@
 schema: ../core.widl
 generates:
-  pkg/module/module.go:
+  actorcore.go:
     package: widl-codegen/language/tinygo
     visitorClass: ModuleVisitor
     config:
