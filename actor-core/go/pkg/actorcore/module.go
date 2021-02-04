@@ -1,4 +1,4 @@
-package module
+package actorcore
 
 import (
 	msgpack "github.com/wapc/tinygo-msgpack"
@@ -6,27 +6,8 @@ import (
 )
 
 /* - Core can only handle, there's nothing to call on the host.
- *
-
-type Host struct {
-	binding string
-}
-
-func NewHost(binding string) *Host {
-	return &Host{
-		binding: binding,
-	}
-}
-
-func (h *Host) HealthRequest(request HealthCheckRequest) (HealthCheckResponse, error) {
-	payload, err := wapc.HostCall(h.binding, "core", "HealthRequest", request.ToBuffer())
-	if err != nil {
-		return HealthCheckResponse{}, err
-	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeHealthCheckResponse(&decoder)
-}
-*/
+ * Removed host struct.
+ */
 
 // Handlers is used to define handler functions for supported `wasmcloud:core` operations
 type Handlers struct {
