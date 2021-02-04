@@ -14,7 +14,7 @@
 //! extern crate actor_http_client as httpclient;
 //! extern crate actor_core as core;
 //!
-//! const API_FQDN: &str = "wasmcloudapi.amazonaws.com"; // Not real
+//! const API_URL: &str = "https://wasmcloudapi.cloud.io/proxy";
 //!
 //! #[no_mangle]
 //! pub fn wapc_init() {
@@ -28,17 +28,10 @@
 //!
 //! /// This function proxys an inbound HTTP request to an external server
 //! fn get_proxy(msg: httpserver::Request) -> HandlerResult<httpserver::Response> {
+//!     // Form client request from server request
 //!     if msg.method == "GET".to_string() {
-//!         let req = httpclient::Request {
-//!             url: API_FQDN.to_string(),
-//!             method: msg.method,
-//!             path: msg.path,
-//!             query_string: msg.query_string,
-//!             header: msg.header,
-//!             body: msg.body
-//!         };
-//!         // Replace `handle_request` with `http::default().request`
-//!         let res = handle_request(req)?;
+//!         let res = request(msg.method, API_URL.to_string(), msg.header)?;
+//!         // Form server response
 //!         Ok(httpserver::Response {
 //!             status_code: res.status_code,
 //!             status: res.status,
@@ -50,7 +43,7 @@
 //!     }
 //! }
 //!
-//! # fn handle_request(req: httpclient::Request) -> HandlerResult<httpclient::Response> {
+//! # fn request(method: String, url: String, headers: std::collections::HashMap<String,String>) -> HandlerResult<httpclient::Response> {
 //! #   Ok(httpclient::Response {
 //! #     status: "OK".to_string(),
 //! #     status_code: 200,
@@ -69,3 +62,5 @@ pub use generated::*;
 use serde::Serialize;
 #[cfg(feature = "guest")]
 use std::collections::HashMap;
+
+pub const OP_PERFORM_REQUEST: &str = "PerformRequest";

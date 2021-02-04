@@ -3,7 +3,6 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
@@ -44,12 +43,24 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub fn handle_request(&self, request: Request) -> HandlerResult<Response> {
+    pub fn request(
+        &self,
+        method: String,
+        url: String,
+        headers: std::collections::HashMap<String, String>,
+        body: Vec<u8>,
+    ) -> HandlerResult<Response> {
+        let input_args = RequestArgs {
+            method,
+            url,
+            headers,
+            body,
+        };
         host_call(
             &self.binding,
             "wasmcloud:httpclient",
-            "HandleRequest",
-            &serialize(request)?,
+            "Request",
+            &serialize(input_args)?,
         )
         .map(|vec| {
             let resp = deserialize::<Response>(vec.as_ref()).unwrap();
@@ -60,42 +71,35 @@ impl Host {
 }
 
 #[cfg(feature = "guest")]
-pub struct Handlers {}
-
-#[cfg(feature = "guest")]
-impl Handlers {
-    pub fn register_handle_request(f: fn(Request) -> HandlerResult<Response>) {
-        *HANDLE_REQUEST.write().unwrap() = Some(f);
-        register_function(&"HandleRequest", handle_request_wrapper);
-    }
-}
-
-#[cfg(feature = "guest")]
 lazy_static! {
-    static ref HANDLE_REQUEST: RwLock<Option<fn(Request) -> HandlerResult<Response>>> =
-        RwLock::new(None);
+    static ref REQUEST: RwLock<
+        Option<
+            fn(
+                String,
+                String,
+                std::collections::HashMap<String, String>,
+                Vec<u8>,
+            ) -> HandlerResult<Response>,
+        >,
+    > = RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
-fn handle_request_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<Request>(input_payload)?;
-    let lock = HANDLE_REQUEST.read().unwrap().unwrap();
-    let result = lock(input)?;
+fn request_wrapper(input_payload: &[u8]) -> CallResult {
+    let input = deserialize::<RequestArgs>(input_payload)?;
+    let lock = REQUEST.read().unwrap().unwrap();
+    let result = lock(input.method, input.url, input.headers, input.body)?;
     Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct Request {
-    #[serde(rename = "url")]
-    pub url: String,
+pub struct RequestArgs {
     #[serde(rename = "method")]
     pub method: String,
-    #[serde(rename = "path")]
-    pub path: String,
-    #[serde(rename = "queryString")]
-    pub query_string: String,
-    #[serde(rename = "header")]
-    pub header: std::collections::HashMap<String, String>,
+    #[serde(rename = "url")]
+    pub url: String,
+    #[serde(rename = "headers")]
+    pub headers: std::collections::HashMap<String, String>,
     #[serde(with = "serde_bytes")]
     #[serde(rename = "body")]
     pub body: Vec<u8>,

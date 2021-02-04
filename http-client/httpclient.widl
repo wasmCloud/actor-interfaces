@@ -1,16 +1,7 @@
 namespace "wasmcloud:httpclient"
 
 interface {
-  HandleRequest{request: Request}: Response
-}
-
-type Request {
-  url: string
-  method: string
-  path: string
-  queryString: string
-  header: {string:string}
-  body: bytes
+  Request(method: string, url: string, headers: {string: string}, body: bytes): Response
 }
 
 type Response {
