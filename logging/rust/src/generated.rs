@@ -3,15 +3,10 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
-
-#[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-use std::sync::RwLock;
 
 #[cfg(feature = "guest")]
 pub struct Host {
@@ -54,31 +49,6 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-}
-
-#[cfg(feature = "guest")]
-pub struct Handlers {}
-
-#[cfg(feature = "guest")]
-impl Handlers {
-    pub fn register_write_log(f: fn(WriteLogRequest) -> HandlerResult<()>) {
-        *WRITE_LOG.write().unwrap() = Some(f);
-        register_function(&"WriteLog", write_log_wrapper);
-    }
-}
-
-#[cfg(feature = "guest")]
-lazy_static! {
-    static ref WRITE_LOG: RwLock<Option<fn(WriteLogRequest) -> HandlerResult<()>>> =
-        RwLock::new(None);
-}
-
-#[cfg(feature = "guest")]
-fn write_log_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<WriteLogArgs>(input_payload)?;
-    let lock = WRITE_LOG.read().unwrap().unwrap();
-    let result = lock(input.request)?;
-    Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]

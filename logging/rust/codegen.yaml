@@ -1,4 +1,4 @@
-schema: ../../schemas/logging.widl
+schema: ../logging.widl
 generates:
   src/generated.rs:
     package: widl-codegen/language/rust
