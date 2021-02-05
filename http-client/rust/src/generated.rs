@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,6 +38,10 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Make an HTTP request with specified method, headers and body to url.
+    /// This request must be carried out by an appropriately bound capability
+    /// provider implementing `wasmcloud:httpclient`, the request is not
+    /// made directly by the actor.
     pub fn request(
         &self,
         method: String,
@@ -68,28 +67,6 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-}
-
-#[cfg(feature = "guest")]
-lazy_static! {
-    static ref REQUEST: RwLock<
-        Option<
-            fn(
-                String,
-                String,
-                std::collections::HashMap<String, String>,
-                Vec<u8>,
-            ) -> HandlerResult<Response>,
-        >,
-    > = RwLock::new(None);
-}
-
-#[cfg(feature = "guest")]
-fn request_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<RequestArgs>(input_payload)?;
-    let lock = REQUEST.read().unwrap().unwrap();
-    let result = lock(input.method, input.url, input.headers, input.body)?;
-    Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]

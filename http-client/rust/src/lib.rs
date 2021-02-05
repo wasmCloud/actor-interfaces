@@ -30,6 +30,7 @@
 //! fn get_proxy(msg: httpserver::Request) -> HandlerResult<httpserver::Response> {
 //!     // Form client request from server request
 //!     if msg.method == "GET".to_string() {
+//!         // Replace `request` with `httpclient::default().request`
 //!         let res = request(msg.method, API_URL.to_string(), msg.header)?;
 //!         // Form server response
 //!         Ok(httpserver::Response {
@@ -58,9 +59,5 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 mod generated;
 pub use generated::*;
-#[cfg(feature = "guest")]
-use serde::Serialize;
-#[cfg(feature = "guest")]
-use std::collections::HashMap;
 
 pub const OP_PERFORM_REQUEST: &str = "PerformRequest";
