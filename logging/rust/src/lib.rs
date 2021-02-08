@@ -16,6 +16,8 @@
 //! #[no_mangle]
 //! pub fn wapc_init() {
 //!     http::Handlers::register_handle_request(method_logger);
+//!     /// Initialize the logger to enable log macros
+//!     logging::enable_macros();
 //! }
 //!
 //! /// Actor must be signed with `wasmcloud:logging` to log messages
@@ -23,8 +25,6 @@
 //!     /// Logs can be directly written via `write_log`
 //!     logging::default().write_log("", "trace", "Coercing Rust String to str");
 //!     
-//!     /// Initialize the logger to intercept log macros
-//!     logging::use_macros();
 //!     /// After initialization, logs can be directly written from the actor using macros
 //!     match &*msg.method {
 //!         "GET" => info!("Received a GET request"),
@@ -60,7 +60,7 @@ impl Host {
     /// * `text` - Text to log
     ///
     pub fn write_log(&self, target: &str, level: &str, text: &str) -> HandlerResult<()> {
-        use_macros();
+        enable_macros();
         let log_level = if LOG_LEVELS.contains(&level.to_ascii_lowercase().as_str()) {
             level
         } else {
@@ -94,7 +94,7 @@ static LOGGER: Host = Host {};
 /// This function must be called before attempting to use log macros
 /// such as `info!` or `debug!` or the logs will not be written by the logger
 #[cfg(feature = "guest")]
-pub fn use_macros() {
+pub fn enable_macros() {
     if log::set_logger(&LOGGER).is_ok() {};
     log::set_max_level(log::LevelFilter::Trace);
 }
