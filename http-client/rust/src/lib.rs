@@ -31,7 +31,7 @@
 //!     // Form client request from server request
 //!     if msg.method == "GET".to_string() {
 //!         // Replace `request` with `httpclient::default().request`
-//!         let res = request(msg.method, API_URL.to_string(), msg.header)?;
+//!         let res = request(msg.method, API_URL.to_string(), msg.header, vec![])?;
 //!         // Form server response
 //!         Ok(httpserver::Response {
 //!             status_code: res.status_code,
@@ -44,7 +44,7 @@
 //!     }
 //! }
 //!
-//! # fn request(method: String, url: String, headers: std::collections::HashMap<String,String>) -> HandlerResult<httpclient::Response> {
+//! # fn request(method: String, url: String, headers: std::collections::HashMap<String,String>, body: Vec<u8>) -> HandlerResult<httpclient::Response> {
 //! #   Ok(httpclient::Response {
 //! #     status: "OK".to_string(),
 //! #     status_code: 200,
