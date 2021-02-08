@@ -90,17 +90,6 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    pub fn deliver_message(&self, message: BrokerMessage) -> HandlerResult<()> {
-        host_call(
-            &self.binding,
-            "wasmcloud:messaging",
-            "DeliverMessage",
-            &serialize(message)?,
-        )
-        .map(|_vec| ())
-        .map_err(|e| e.into())
-    }
 }
 
 #[cfg(feature = "guest")]
@@ -108,50 +97,22 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    pub fn register_publish(f: fn(String, String, Vec<u8>) -> HandlerResult<PublishResponse>) {
-        *PUBLISH.write().unwrap() = Some(f);
-        register_function(&"Publish", publish_wrapper);
-    }
-    pub fn register_request(f: fn(String, Vec<u8>, i64) -> HandlerResult<BrokerMessage>) {
-        *REQUEST.write().unwrap() = Some(f);
-        register_function(&"Request", request_wrapper);
-    }
-    pub fn register_deliver_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
-        *DELIVER_MESSAGE.write().unwrap() = Some(f);
-        register_function(&"DeliverMessage", deliver_message_wrapper);
+    pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
+        *HANDLE_MESSAGE.write().unwrap() = Some(f);
+        register_function(&"HandleMessage", handle_message_wrapper);
     }
 }
 
 #[cfg(feature = "guest")]
 lazy_static! {
-    static ref PUBLISH: RwLock<Option<fn(String, String, Vec<u8>) -> HandlerResult<PublishResponse>>> =
-        RwLock::new(None);
-    static ref REQUEST: RwLock<Option<fn(String, Vec<u8>, i64) -> HandlerResult<BrokerMessage>>> =
-        RwLock::new(None);
-    static ref DELIVER_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> =
+    static ref HANDLE_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> =
         RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
-fn publish_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<PublishArgs>(input_payload)?;
-    let lock = PUBLISH.read().unwrap().unwrap();
-    let result = lock(input.subject, input.reply_to, input.body)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn request_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<RequestArgs>(input_payload)?;
-    let lock = REQUEST.read().unwrap().unwrap();
-    let result = lock(input.subject, input.body, input.timeout)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn deliver_message_wrapper(input_payload: &[u8]) -> CallResult {
+fn handle_message_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<BrokerMessage>(input_payload)?;
-    let lock = DELIVER_MESSAGE.read().unwrap().unwrap();
+    let lock = HANDLE_MESSAGE.read().unwrap().unwrap();
     let result = lock(input)?;
     Ok(serialize(result)?)
 }
