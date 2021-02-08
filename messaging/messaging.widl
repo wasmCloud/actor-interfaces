@@ -1,9 +1,9 @@
-namespace "wascc:messaging"
+namespace "wasmcloud:messaging"
 
 interface {    
-    Publish(subject: string, reply_to: string, body: bytes): PublishResponse
+    Publish(subject: string, replyTo: string, body: bytes): PublishResponse
     Request(subject: string, body: bytes, timeout: i64): BrokerMessage
-    DeliverMessage{message: BrokerMessage}
+    DeliverMessage{message: BrokerMessage}: void
 }
 
 type PublishResponse {
@@ -12,7 +12,6 @@ type PublishResponse {
 
 type BrokerMessage {
     subject: string
-    reply_to: string
+    replyTo: string
     body: bytes
 }
-
