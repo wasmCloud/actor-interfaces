@@ -3,9 +3,9 @@
 //!
 //! This crate provides wasmCloud actors with an interface to the Messaging capability provider. Actors using this
 //! interface must have the claim `wasmcloud:messaging` in order to have permission to handle messages, publish
-//! messages and request messages. They also must have an active, configured binding to a Messaging capability provider.
+//! and perform request-response actions. They also must have an active, configured binding to a Messaging capability provider.
 //!
-//! Example:
+//! # Example:
 //! ```rust
 //! extern crate actor_messaging as messaging;
 //! extern crate wapc_guest as guest;
