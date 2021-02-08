@@ -6,28 +6,26 @@ use std::io::Cursor;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
+use crate::{set_binding, CURRENT_BINDING};
+#[cfg(feature = "guest")]
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-pub struct Host {
-    binding: String,
-}
+pub struct Host {}
 
 #[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
-        Host {
-            binding: "default".to_string(),
-        }
+        set_binding("default");
+        Host {}
     }
 }
 
 /// Creates a named host binding
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
-    Host {
-        binding: binding.to_string(),
-    }
+    set_binding(binding);
+    Host {}
 }
 
 /// Creates the default host binding
@@ -38,10 +36,19 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub fn write_log(&self, request: WriteLogRequest) -> HandlerResult<()> {
-        let input_args = WriteLogArgs { request: request };
+    pub(crate) fn _write_log(
+        &self,
+        target: String,
+        level: String,
+        text: String,
+    ) -> HandlerResult<()> {
+        let input_args = WriteLogArgs {
+            target,
+            level,
+            text,
+        };
         host_call(
-            &self.binding,
+            &CURRENT_BINDING.read().unwrap(),
             "wasmcloud:logging",
             "WriteLog",
             &serialize(input_args)?,
@@ -53,18 +60,12 @@ impl Host {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct WriteLogArgs {
-    #[serde(rename = "request")]
-    pub request: WriteLogRequest,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct WriteLogRequest {
+    #[serde(rename = "target")]
+    pub target: String,
     #[serde(rename = "level")]
-    pub level: u8,
-    #[serde(rename = "body")]
-    pub body: String,
-    #[serde(rename = "actor")]
-    pub actor: Option<String>,
+    pub level: String,
+    #[serde(rename = "text")]
+    pub text: String,
 }
 
 /// The standard function for serializing codec structs into a format that can be
