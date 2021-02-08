@@ -1,0 +1,28 @@
+[package]
+name = "actor-http-client"
+version = "0.1.0"
+description = "HTTP Client Actor Interface for wasmCloud Actors"
+authors = ["wasmCloud Team"]
+edition = "2018"
+license = "Apache-2.0"
+documentation = "https://docs.rs/actor-http-client"
+readme = "README.md"
+keywords = ["webassembly", "wasm", "wasmcloud", "actor"]
+categories = ["wasm", "api-bindings"]
+
+[features]
+guest = ["wapc-guest", "lazy_static"]
+
+[dependencies]
+wapc-guest = { version = "0.4.0", optional = true }
+serde = { version = "1.0.115" , features = ["derive"] }
+serde_bytes = "0.11.5"
+rmp-serde = "0.14.4"
+lazy_static = { version = "1.4.0", optional = true}
+
+[dev-dependencies]
+structopt = "0.3.17"
+serde_json = "1.0.57"
+base64 = "0.12.3"
+actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"]}
+actor-http-server = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"]}

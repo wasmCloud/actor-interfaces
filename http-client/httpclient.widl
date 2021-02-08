@@ -1,0 +1,12 @@
+namespace "wasmcloud:httpclient"
+
+interface {
+  Request(method: string, url: string, headers: {string: string}, body: bytes): Response
+}
+
+type Response {
+  statusCode: u32
+  status: string
+  header: {string:string}
+  body: bytes
+}
