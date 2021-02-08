@@ -10,12 +10,12 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. C
 | --- | :---: | :---: | :---: |
 | [Core](./actor-core/core.widl) | [✅](./actor-core/rust/README.md) | ⛔ | [✅](./actor-core/assemblyscript/README.md) |
 | [HTTP Server](./http-server/http.widl) | [✅](./http-server/rust/README.md) | ⛔ | [✅](./http-server/assemblyscript/README.md) |
-| [HTTP Client](./http-client/http_client.widl) | ⛔ | ⛔ | ⛔ |
+| [HTTP Client](./http-client/http_client.widl) |[✅](./http-client/rust/README.md)| ⛔ | ⛔ |
 | [Key-Value Store](./keyvalue/keyvalue.widl) | [✅](./keyvalue/rust/README.md) | ⛔ | [✅](./keyvalue/assemblyscript/README.md) |
 | [Messaging](./messaging//messaging.widl) | [✅](./messaging/rust/README.md) | ⛔ | ⛔ |
 | [Telnet](./telnet/telnet.widl) | [✅](./telnet/rust/README.md) | ⛔ | ⛔ |
 | [GraphDB](./graphdb/graphdb.widl) | [✅](./graphdb/rust/README.md) | ⛔ | ⛔ |
 | [Blob Store](./blobstore/blobstore.widl) | [✅](./blobstore/rust/README.md) | ⛔ | ⛔ |
 | [Event Streams](./eventstreams/eventstreams.widl) | [✅](./eventstreams/rust/README.md) | ⛔ | ⛔ |
-| Logging | ⛔ | ⛔ | ⛔ |
+| [Logging](./logging/logging.widl) | [✅](./logging/rust/README.md) | ⛔ | ⛔ |
 | [Extras](./extras/extras.widl) | [✅](./extras/rust/README.md) | ⛔ | ⛔ |
