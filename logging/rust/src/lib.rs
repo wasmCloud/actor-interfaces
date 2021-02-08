@@ -60,7 +60,6 @@ impl Host {
     /// * `text` - Text to log
     ///
     pub fn write_log(&self, target: &str, level: &str, text: &str) -> HandlerResult<()> {
-        enable_macros();
         let log_level = if LOG_LEVELS.contains(&level.to_ascii_lowercase().as_str()) {
             level
         } else {
@@ -111,21 +110,19 @@ impl log::Log for Host {
     }
 
     fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) {
-            use log::Level::*;
-            let level = match record.level() {
-                Error => "error",
-                Warn => "warn",
-                Info => "info",
-                Debug => "debug",
-                Trace => "trace",
-            };
-            let _ = self._write_log(
-                record.target().to_string(),
-                level.to_string(),
-                format!("{}", record.args()),
-            );
-        }
+        use log::Level::*;
+        let level = match record.level() {
+            Error => "error",
+            Warn => "warn",
+            Info => "info",
+            Debug => "debug",
+            Trace => "trace",
+        };
+        let _ = self._write_log(
+            record.target().to_string(),
+            level.to_string(),
+            format!("{}", record.args()),
+        );
     }
 
     fn flush(&self) {}
