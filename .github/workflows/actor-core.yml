@@ -4,11 +4,11 @@ on:
   push:
     branches: [ main ]
     paths:
-    - "http-client/**"
+    - "actor-core/**"
   pull_request:
     branches: [ main ]
     paths:
-    - "http-client/**"
+    - "actor-core/**"
 
 env:
   CARGO_TERM_COLOR: always
