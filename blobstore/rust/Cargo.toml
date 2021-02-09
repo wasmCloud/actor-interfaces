@@ -1,11 +1,11 @@
 [package]
-name = "actor-blobstore"
+name = "wasmcloud-actor-blobstore"
 version = "0.1.0"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the blobstore contract for use by wasmCloud Actors"
 license = "Apache-2.0"
-documentation = "https://docs.rs/actor-blobstore"
+documentation = "https://docs.rs/wasmcloud-actor-blobstore"
 readme = "README.md"
 keywords = ["wasm", "wasmcloud", "actor", "events"]
 categories = ["wasm", "api-bindings"]
@@ -26,11 +26,11 @@ log = { version="0.4.14", features =["std","serde"]}
 
 [dev-dependencies]
 structopt = "0.3.21"
-serde_json = "1.0.61"
+serde_json = "1.0.62"
 base64 = "0.13.0"
-log = "0.4.11"
-actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"] }
-actor-http-server = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"] }
+log = "0.4.14"
+wasmcloud-actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"] }
+wasmcloud-actor-http-server = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"] }
 
 [profile.release]
 # Optimize for small code size

@@ -1,11 +1,11 @@
 [package]
-name = "actor-graphdb"
+name = "wasmcloud-actor-graphdb"
 version = "0.1.0"
 description = "GraphDB Actor Interface for wasmCloud Actors"
 authors = ["wasmCloud Team"]
 edition = "2018"
 license = "Apache-2.0"
-documentation = "https://docs.rs/actor-graphdb"
+documentation = "https://docs.rs/wasmcloud-actor-graphdb"
 readme = "README.md"
 repository = "https://github.com/wasmCloud/actor-interfaces"
 keywords = ["webassembly", "wasm", "wasmcloud", "actor", "graph", "graphdb"]
@@ -32,7 +32,7 @@ actor-core = { git = "https://github.com/wasmCloud/actor-interfaces", branch = "
 structopt = "0.3.17"
 serde_json = "1.0.57"
 base64 = "0.12.3"
-actor-http-server = { git = "https://github.com/wasmCloud/actor-interfaces", branch = "main", features = ["guest"]}
+wasmcloud-actor-http-server = { git = "https://github.com/wasmCloud/actor-interfaces", branch = "main", features = ["guest"]}
 
 [profile.release]
 # Optimize for small code size

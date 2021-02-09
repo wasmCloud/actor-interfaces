@@ -7,7 +7,7 @@
 //!
 //! # Example
 //! ```
-//! extern crate actor_core as actorcore; // Avoid using the module name `core`
+//! extern crate wasmcloud_actor_core as actorcore; 
 //! use wapc_guest::HandlerResult;
 //! use actorcore::{HealthCheckRequest, HealthCheckResponse, Handlers};
 //!
@@ -27,6 +27,23 @@ pub use generated::{
     deserialize, serialize, CapabilityConfiguration, Handlers, HealthCheckRequest,
     HealthCheckResponse,
 };
+
+#[cfg(feature = "guest")]
+use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "guest")]
+/// Performs an actor-to-actor call, with the target actor identified by a reference string. This
+/// reference can be an OCI image URL, a 56-character public key (subject), or, if one is defined,
+/// a developer-friendly call alias
+pub fn call_actor<'de, T: Serialize, U: Deserialize<'de>>(
+    actor_ref: &str,
+    operation: &str,
+    msg: &T,
+) -> wapc_guest::HandlerResult<U> {
+    let res = wapc_guest::host_call("default", actor_ref, operation, &generated::serialize(msg)?)?;
+    let res = generated::deserialize(&res)?;
+    Ok(res)
+}
 
 impl HealthCheckResponse {
     pub fn healthy() -> HealthCheckResponse {

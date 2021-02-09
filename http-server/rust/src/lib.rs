@@ -10,7 +10,7 @@
 
 //! # Example:
 //! ```
-//! extern crate actor_http_server as http;
+//! extern crate wasmcloud_actor_http_server as http;
 //! use wapc_guest::HandlerResult;
 //! use http::{Request, Response, Handlers};
 //!

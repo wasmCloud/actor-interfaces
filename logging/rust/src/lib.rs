@@ -7,8 +7,8 @@
 //!
 //! Example:
 //! ```rust
-//! extern crate actor_http_server as http;
-//! extern crate actor_logging as logging;
+//! extern crate wasmcloud_actor_http_server as http;
+//! extern crate wasmcloud_actor_logging as logging;
 //! use wapc_guest::HandlerResult;
 //! use http::{Request, Response, Handlers};
 //! use log::{info, warn, error, trace, debug};

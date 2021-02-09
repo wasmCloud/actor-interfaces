@@ -16,15 +16,16 @@
 //! ```rust
 //! extern crate wapc_guest as guest;
 //! use guest::prelude::*;
-//! use actor_extras as extras;
-//! use actor_http_server as http;
+//! use wasmcloud_actor_core as core;
+//! use wasmcloud_actor_extras as extras;
+//! use wasmcloud_actor_http_server as http;
 //! use serde_json::json;
 //! use log::{error, info};
 //!
 //! #[no_mangle]
 //! pub fn wapc_init() {
 //!     http::Handlers::register_handle_request(generate_guid);
-//!     actor_core::Handlers::register_health_request(health);
+//!     core::Handlers::register_health_request(health);
 //! }
 //!
 //! /// Generate a Guid and return it in a JSON envelope
@@ -37,8 +38,8 @@
 //!
 //! }
 //!
-//! fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
-//!   Ok(actor_core::HealthCheckResponse::healthy())   
+//! fn health(_: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
+//!   Ok(core::HealthCheckResponse::healthy())   
 //! }
 //!
 //! # fn get_guid() -> HandlerResult<Option<String>> {

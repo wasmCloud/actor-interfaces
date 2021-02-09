@@ -9,7 +9,7 @@
 //!
 //! # Example:
 //! ```
-//! extern crate actor_keyvalue as kv;
+//! extern crate wasmcloud_actor_keyvalue as kv;
 //! use wapc_guest::HandlerResult;
 //!
 //! fn add() -> HandlerResult<()> {
