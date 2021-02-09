@@ -1,11 +1,11 @@
 [package]
-name = "actor-http-server"
+name = "wasmcloud-actor-http-server"
 version = "0.1.0"
-description = "HTTP Server Actor Interface for waSCC Actors"
-authors = ["waSCC Team"]
+description = "HTTP Server Actor Interface for wasmCloud Actors"
+authors = ["wasmcloud Team"]
 edition = "2018"
 license = "Apache-2.0"
-documentation = "https://docs.rs/actor-http-server"
+documentation = "https://docs.rs/wasmcloud-actor-http-server"
 readme = "README.md"
 keywords = ["webassembly", "wasm", "wascc", "actor"]
 categories = ["wasm", "api-bindings"]
@@ -16,12 +16,12 @@ guest = ["wapc-guest", "lazy_static"]
 [dependencies]
 wapc-guest = { version = "0.4.0", optional = true}
 lazy_static = { version = "1.4.0", optional = true}
-serde = { version = "1.0.119" , features = ["derive"] }
-serde_json = "1.0.61"
-serde_derive = "1.0.119"
+serde = { version = "1.0.123" , features = ["derive"] }
+serde_json = "1.0.62"
+serde_derive = "1.0.123"
 serde_bytes = "0.11.5"
-rmp-serde = "0.15.1"
-log = { version="0.4.13", features =["std","serde"]}
+rmp-serde = "0.15.4"
+log = { version="0.4.14", features =["std","serde"]}
 
 [profile.release]
 # Optimize for small code size

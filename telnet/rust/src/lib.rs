@@ -7,8 +7,8 @@
 //!
 //! # Example:
 //! ```
-//! extern crate actor_telnet as telnet;
-//! // extern crate actor_core as actorcore;
+//! extern crate wasmcloud_actor_telnet as telnet;
+//! // extern crate wasmcloud_actor_core as actorcore;
 //! use wapc_guest::HandlerResult;
 //!
 //! #[no_mangle]

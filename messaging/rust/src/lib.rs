@@ -7,13 +7,14 @@
 //!
 //! # Example:
 //! ```rust
-//! extern crate actor_messaging as messaging;
+//! extern crate wasmcloud_actor_messaging as messaging;
+//! extern crate wasmcloud_actor_core as core;
 //! extern crate wapc_guest as guest;
 //! use guest::prelude::*;
 //!
 //! #[no_mangle]
 //! pub fn wapc_init() {
-//!     actor_core::Handlers::register_health_request(health);
+//!     core::Handlers::register_health_request(health);
 //!     messaging::Handlers::register_handle_message(handle_message);
 //! }
 //!
@@ -25,8 +26,8 @@
 //!     Ok(())
 //! }
 //!
-//! fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
-//!   Ok(actor_core::HealthCheckResponse::healthy())   
+//! fn health(_: core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
+//!   Ok(core::HealthCheckResponse::healthy())   
 //! }
 //! ```
 

@@ -1,11 +1,11 @@
 [package]
-name = "actor-messaging"
+name = "wasmcloud-actor-messaging"
 version = "0.1.0"
 description = "Messaging wasmCloud Actor Interface"
 authors = ["wasmCloud Team"]
 edition = "2018"
 license = "Apache-2.0"
-documentation = "https://docs.rs/actor-messaging"
+documentation = "https://docs.rs/wasmcloud-actor-messaging"
 readme = "README.md"
 keywords = ["webassembly", "wasm", "wasmcloud", "actor"]
 categories = ["wasm", "api-bindings"]
@@ -16,12 +16,12 @@ guest = ["wapc-guest", "lazy_static"]
 [dependencies]
 wapc-guest = { version = "0.4.0", optional = true}
 lazy_static = { version = "1.4.0", optional = true}
-serde = { version = "1.0.115" , features = ["derive"] }
+serde = { version = "1.0.123" , features = ["derive"] }
 serde_bytes = "0.11.5"
-rmp-serde = "0.14.4"
+rmp-serde = "0.15.4"
 
 [dev-dependencies]
-structopt = "0.3.17"
-serde_json = "1.0.57"
-base64 = "0.12.3"
-actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"]}
+structopt = "0.3.21"
+serde_json = "1.0.62"
+base64 = "0.13.0"
+wasmcloud-actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"]}

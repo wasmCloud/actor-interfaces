@@ -10,9 +10,9 @@
 //! # Example:
 //! ```
 //! use wapc_guest::HandlerResult;
-//! extern crate actor_http_server as httpserver;
-//! extern crate actor_http_client as httpclient;
-//! extern crate actor_core as core;
+//! extern crate wasmcloud_actor_http_server as httpserver;
+//! extern crate wasmcloud_actor_http_client as httpclient;
+//! extern crate wasmcloud_actor_core as core;
 //!
 //! const API_URL: &str = "https://wasmcloudapi.cloud.io/proxy";
 //!
