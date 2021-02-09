@@ -7,7 +7,7 @@
 //!
 //! # Example
 //! ```
-//! extern crate actor_core as actorcore; // Avoid using the module name `core`
+//! extern crate wasmcloud_actor_core as actorcore; 
 //! use wapc_guest::HandlerResult;
 //! use actorcore::{HealthCheckRequest, HealthCheckResponse, Handlers};
 //!

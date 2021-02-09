@@ -1,11 +1,11 @@
 [package]
-name = "actor-core"
+name = "wasmcloud-actor-core"
 description = "wasmCloud Core Actor Interface"
 version = "0.2.0"
 authors = ["wasmCloud Team"]
 edition = "2018"
 license = "Apache-2.0"
-documentation = "https://docs.rs/actor-core"
+documentation = "https://docs.rs/wasmcloud-actor-core"
 readme = "README.md"
 keywords = ["webassembly", "wasm", "wasmcloud", "actor"]
 categories = ["wasm", "api-bindings"]

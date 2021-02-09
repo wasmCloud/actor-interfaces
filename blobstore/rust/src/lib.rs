@@ -12,9 +12,9 @@
 //! ```rust
 //! extern crate wapc_guest as guest;
 //! use guest::prelude::*;
-//! use actor_blobstore as blobstore;
-//! use actor_http_server as http;
-//! use actor_core::serialize;
+//! use wasmcloud_actor_blobstore as blobstore;
+//! use wasmcloud_actor_http_server as http;
+//! use wasmcloud_actor_core::serialize;
 //! use blobstore::*;
 //! use serde_json::json;
 //! use log::{error, info};

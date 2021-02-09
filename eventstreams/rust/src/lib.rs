@@ -6,7 +6,7 @@
 //!
 //! # Example:
 //! ```
-//! extern crate actor_eventstreams as streams;
+//! extern crate wasmcloud_actor_eventstreams as streams;
 //! // extern crate actor_core as actorcore;
 //! use wapc_guest::HandlerResult;
 //! use streams::StreamQuery;
