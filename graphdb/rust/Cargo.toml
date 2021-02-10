@@ -8,7 +8,7 @@ license = "Apache-2.0"
 documentation = "https://docs.rs/wasmcloud-actor-graphdb"
 readme = "README.md"
 repository = "https://github.com/wasmCloud/actor-interfaces"
-keywords = ["webassembly", "wasm", "wasmcloud", "actor", "graph", "graphdb"]
+keywords = ["webassembly", "wasm", "wasmcloud", "actor", "graph"]
 categories = ["wasm", "api-bindings"]
 
 [badges]
