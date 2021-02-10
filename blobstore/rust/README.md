@@ -53,8 +53,4 @@ fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::Health
   Ok(actor_core::HealthCheckResponse::healthy())   
 }
 
-# fn start_download(req: StreamRequest) -> HandlerResult<()> {
-#   Ok(())
-# }
-
 ```
