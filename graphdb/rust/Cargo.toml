@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-graphdb"
-version = "0.1.0"
+version = "0.1.1"
 description = "GraphDB Actor Interface for wasmCloud Actors"
 authors = ["wasmCloud Team"]
 edition = "2018"
