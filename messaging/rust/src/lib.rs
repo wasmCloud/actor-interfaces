@@ -11,6 +11,7 @@
 //! extern crate wasmcloud_actor_core as core;
 //! extern crate wapc_guest as guest;
 //! use guest::prelude::*;
+//! use wasmcloud_actor_core as actor_core;
 //!
 //! #[no_mangle]
 //! pub fn wapc_init() {
