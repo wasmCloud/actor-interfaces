@@ -7,7 +7,7 @@
 //!
 //! # Example
 //! ```
-//! extern crate wasmcloud_actor_core as actorcore; 
+//! extern crate wasmcloud_actor_core as actorcore;
 //! use wapc_guest::HandlerResult;
 //! use actorcore::{HealthCheckRequest, HealthCheckResponse, Handlers};
 //!
