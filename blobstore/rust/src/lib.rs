@@ -15,6 +15,7 @@
 //! use wasmcloud_actor_blobstore as blobstore;
 //! use wasmcloud_actor_http_server as http;
 //! use wasmcloud_actor_core::serialize;
+//! use wasmcloud_actor_core as actor_core;
 //! use blobstore::*;
 //! use serde_json::json;
 //! use log::{error, info};

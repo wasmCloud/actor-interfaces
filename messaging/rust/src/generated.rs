@@ -53,7 +53,7 @@ impl Host {
     ///
     /// # Example
     /// ```rust
-    /// extern crate actor_messaging as messaging;
+    /// extern crate wasmcloud_actor_messaging as messaging;
     /// fn send_message() {
     ///     let subject = "first.app".to_string();
     ///     let reply_to = "".to_string();
@@ -96,7 +96,7 @@ impl Host {
     ///
     /// # Example
     /// ```rust
-    /// extern crate actor_messaging as messaging;
+    /// extern crate wasmcloud_actor_messaging as messaging;
     /// fn hello_there() {
     ///     let subject = "first.app".to_string();
     ///     let body = "hello?".to_string().into_bytes();
@@ -143,7 +143,7 @@ impl Handlers {
     /// # Example
     /// ```rust
     /// extern crate wapc_guest as guest;
-    /// extern crate actor_messaging as messaging;
+    /// extern crate wasmcloud_actor_messaging as messaging;
     /// use guest::prelude::*;
     ///
     /// #[no_mangle]

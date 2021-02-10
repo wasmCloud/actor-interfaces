@@ -8,9 +8,10 @@
 //! ```rust
 //! use serde_json::json;
 //! extern crate wapc_guest as guest;
-//! use actor_graphdb as graph;
+//! use wasmcloud_actor_graphdb as graph;
 //! use graph::*;
-//! use actor_http_server as http;
+//! use wasmcloud_actor_http_server as http;
+//! use wasmcloud_actor_core as actor_core;
 //!
 //! use guest::prelude::*;
 //!
