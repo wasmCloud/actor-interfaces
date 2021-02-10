@@ -7,9 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   working-directory: ./actor-core
-
 
 jobs:
   release:
@@ -48,4 +46,6 @@ jobs:
         uses: actions/checkout@v1
       - name: NPM Publish
         run: npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: ${{ env.working-directory }}/assemblyscript
