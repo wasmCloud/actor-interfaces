@@ -5,7 +5,7 @@ actors to write immutable events to a stream, receive events from a stream,
 and query events from a stream.
 
 # Example:
-```
+```rust
 extern crate wasmcloud_actor_eventstreams as streams;
 // extern crate actor_core as actorcore;
 use wapc_guest::HandlerResult;
