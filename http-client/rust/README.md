@@ -43,12 +43,5 @@ fn get_proxy(msg: httpserver::Request) -> HandlerResult<httpserver::Response> {
         Ok(httpserver::Response::internal_server_error("Only GET requests can be proxied with this actor"))
     }
 }
-
-# fn request(method: String, url: String, headers: std::collections::HashMap<String,String>, body: Vec<u8>) -> HandlerResult<httpclient::Response> {
-#   Ok(httpclient::Response {
-#     status: "OK".to_string(),
-#     status_code: 200,
-#     ..Default::default()
-#   })
-# }
+```
 

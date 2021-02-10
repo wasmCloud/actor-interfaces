@@ -42,33 +42,5 @@ fn handle_http_request(_: http::Request) -> HandlerResult<http::Response> {
 fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
   Ok(actor_core::HealthCheckResponse::healthy())   
 }
-
-# fn query_db<T: graph::FromTable>(graph_name: String, query: String) -> ::wapc_guest::HandlerResult<T> {
-#    T::from_table(&ResultSet {
-#       statistics: vec![],
-#       columns: vec![
-#           Column {
-#               scalars: Some(vec![Scalar {
-#                   bool_value: None,
-#                   double_value: None,
-#                   int_value: None,
-#                   string_value: Some("Alice Rider".to_string()),
-#               }]),
-#               nodes: Some(vec![]),
-#               relations: Some(vec![]),
-#           },
-#           Column {
-#               scalars: Some(vec![Scalar {
-#                   bool_value: None,
-#                   double_value: None,
-#                   int_value: Some(1985),
-#                   string_value: None,
-#               }]),
-#               nodes: Some(vec![]),
-#               relations: Some(vec![]),
-#           },
-#       ],
-#    }).map_err(|e| format!("{}", e).into())
-# }
 ```
 
