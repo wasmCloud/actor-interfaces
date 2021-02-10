@@ -7,7 +7,6 @@ and query events from a stream.
 # Example:
 ```rust
 extern crate wasmcloud_actor_eventstreams as streams;
-// extern crate actor_core as actorcore;
 use wapc_guest::HandlerResult;
 use streams::StreamQuery;
 use std::collections::HashMap;
@@ -15,7 +14,7 @@ use std::collections::HashMap;
 #[no_mangle]
 pub fn wapc_init() {
     streams::Handlers::register_deliver_event(deliver_event);
-//     actorcore::Handlers::register_health_request(health);
+    wasmcloud_actor)core::Handlers::register_health_request(health);
 }
 
 fn deliver_event(event: streams::Event) -> HandlerResult<bool> {
