@@ -8,7 +8,7 @@ and they must have an active, configured binding to an HTTP Client capability pr
 wasmCloud actors without this permission and capability binding will be unable to make outbound HTTP requests.
 
 # Example:
-```
+```rust
 use wapc_guest::HandlerResult;
 extern crate wasmcloud_actor_http_server as httpserver;
 extern crate wasmcloud_actor_http_client as httpclient;

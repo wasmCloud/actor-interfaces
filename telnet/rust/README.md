@@ -6,7 +6,7 @@ received on a given session. Actors can also emit text to a specific session, wh
 ultimately correlates to an individual connected socket client.
 
 # Example:
-```
+```rust
 extern crate wasmcloud_actor_telnet as telnet;
 // extern crate wasmcloud_actor_core as actorcore;
 use wapc_guest::HandlerResult;
