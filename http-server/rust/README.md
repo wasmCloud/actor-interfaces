@@ -1,4 +1,8 @@
-# HTTP Server Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-http-server.svg)](https://crates.io/crates/wasmcloud-actor-http-server)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/HTTP%20Server)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-http-server.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-http-server/badge.svg)](https://docs.rs/wasmcloud-actor-http-server)
+# wasmCloud HTTP Server Actor Interface
 
 This crate provides waSCC actors with an interface to the HTTP Server capability provider. Actors using this
 interface must have the claim `wasmcloud:httpserver` in order to have permission to handle requests, and they

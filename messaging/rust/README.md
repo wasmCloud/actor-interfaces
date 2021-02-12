@@ -1,4 +1,8 @@
-# Messaging wasmCloud Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-messaging.svg)](https://crates.io/crates/wasmcloud-actor-messaging)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Messaging)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-messaging.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-messaging/badge.svg)](https://docs.rs/wasmcloud-actor-messaging)
+# wasmCloud Messaging Actor Interface
 
 This crate provides wasmCloud actors with an interface to the Messaging capability provider. Actors using this
 interface must have the claim `wasmcloud:messaging` in order to have permission to handle messages, publish

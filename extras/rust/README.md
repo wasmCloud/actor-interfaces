@@ -1,3 +1,7 @@
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-extras.svg)](https://crates.io/crates/wasmcloud-actor-extras)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Extras)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-extras.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-extras/badge.svg)](https://docs.rs/wasmcloud-actor-extras)
 # wasmCloud Extras Actor Interface
 
 This crate provides wasmCloud actors with an interface to the extras capability provider.

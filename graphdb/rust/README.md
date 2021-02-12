@@ -1,4 +1,8 @@
-GraphDB wasmCloud Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-graphdb.svg)](https://crates.io/crates/wasmcloud-actor-graphdb)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/GraphDB)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-graphdb.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-graphdb/badge.svg)](https://docs.rs/wasmcloud-actor-graphdb)
+# wasmCloud GraphDB Actor Interface
 
 This crate provides an abstraction over the `wasmcloud:graphdb` contract. This
 allows actors to interact with a graph database, such as RedisGraph or Neo4j.

@@ -1,4 +1,8 @@
-# Event Streams wasmCloud Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-eventstreams.svg)](https://crates.io/crates/wasmcloud-actor-eventstreams)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Event%20Streams)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-eventstreams.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-eventstreams/badge.svg)](https://docs.rs/wasmcloud-actor-eventstreams)
+# wasmCloud Event Streams Actor Interface
 
 This crate provides an abstraction over the `wasmcloud:eventstreams` contract. This allows
 actors to write immutable events to a stream, receive events from a stream,

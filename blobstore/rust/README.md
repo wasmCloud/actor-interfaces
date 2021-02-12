@@ -1,3 +1,7 @@
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-blobstore.svg)](https://crates.io/crates/wasmcloud-actor-blobstore)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Blobstore)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-blobstore.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-blobstore/badge.svg)](https://docs.rs/wasmcloud-actor-blobstore)
 # wasmCloud Blob Store Actor Interface
 
 This crate provides wasmCloud actors with an interface to the blobstore capability provider.
