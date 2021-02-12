@@ -8,7 +8,7 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. T
 
 | Interface | 🦀 Rust | TinyGo | AssemblyScript |
 | --- | :---: | :---: | :---: |
-| [Core](./actor-core/core.widl) | [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-core)](https://crates.io/crates/wasmcloud-actor-core) | ⛔ | [![npm](https://img.shields.io/npm/v/@wasmcloud/actor-core?color=green)](https://www.npmjs.com/package/@wasmcloud/actor-core) |
+| [Core](./actor-core/core.widl) | [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-core)](https://crates.io/crates/wasmcloud-actor-core) | ![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/wasmcloud/actor-interfaces?filename=actor-core%2Fgo%2Fgo.mod) | [![npm](https://img.shields.io/npm/v/@wasmcloud/actor-core?color=green)](https://www.npmjs.com/package/@wasmcloud/actor-core) |
 | [HTTP Server](./http-server/http.widl) | [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-http-server)](https://crates.io/crates/wasmcloud-actor-http-server) | ⛔ | [![npm](https://img.shields.io/npm/v/@wasmcloud/actor-http-server?color=green)](https://www.npmjs.com/package/@wasmcloud/actor-http-server) |
 | [HTTP Client](./http-client/http_client.widl) | [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-http-client)](https://crates.io/crates/wasmcloud-actor-http-client) | ⛔ | ⛔ |
 | [Key-Value Store](./keyvalue/keyvalue.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-keyvalue)](https://crates.io/crates/wasmcloud-actor-keyvalue)  | ⛔ | [![npm](https://img.shields.io/npm/v/@wasmcloud/actor-keyvalue?color=green)](https://www.npmjs.com/package/@wasmcloud/actor-keyvalue) |
