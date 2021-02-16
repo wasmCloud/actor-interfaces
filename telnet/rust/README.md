@@ -1,4 +1,8 @@
-# Telnet Server wasmCloud Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-telnet.svg)](https://crates.io/crates/wasmcloud-actor-telnet)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Telnet)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-telnet.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-telnet/badge.svg)](https://docs.rs/wasmcloud-actor-telnet)
+# wasmCloud Telnet Server Actor Interface
 
 This crate provides an abstraction over the `wasmcloud:telnet` contract. This allows
 actors to be notified when a new telnet session has started and when text has been

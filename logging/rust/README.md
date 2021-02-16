@@ -1,3 +1,7 @@
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-logging.svg)](https://crates.io/crates/wasmcloud-actor-logging)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Logging)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-logging.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-logging/badge.svg)](https://docs.rs/wasmcloud-actor-logging)
 # wasmCloud Logging Actor Interface
 
 This crate provides an abstraction over the `wasmcloud:logging` contract. This

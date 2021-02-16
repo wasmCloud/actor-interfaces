@@ -1,4 +1,4 @@
-# Actor Core wasmCloud Interface (TinyGo)
+# wasmCloud Core Actor Interface
 
 This is the actor interface for the `wasmcloud:core` capability contract ID. This interface 
 is required by all actors. Using this interface your actor can implement a handler for

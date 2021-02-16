@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-messaging"
-version = "0.1.0"
+version = "0.1.1"
 description = "Messaging wasmCloud Actor Interface"
 authors = ["wasmCloud Team"]
 edition = "2018"

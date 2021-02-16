@@ -1,4 +1,8 @@
-# wasmCloud Key Value Store Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-keyvalue.svg)](https://crates.io/crates/wasmcloud-actor-keyvalue)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/KeyValue)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-keyvalue.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-keyvalue/badge.svg)](https://docs.rs/wasmcloud-actor-keyvalue)
+# wasmCloud Key Value Store Actor Interface
 
 This crate provides an interface for actors to use to communicate with a key-value
 store capability provider. Actors using this interface must have the `wasmcloud:keyvalue` capability

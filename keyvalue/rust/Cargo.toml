@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-keyvalue"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the key-value contract for use by wasmCloud Actors"

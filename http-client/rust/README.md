@@ -1,5 +1,8 @@
-#![doc(html_logo_url = "https://avatars2.githubusercontent.com/u/52050279?s=200&v=4")]
-# HTTP Client wasmCloud Actor Interface
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-http-client.svg)](https://crates.io/crates/wasmcloud-actor-http-client)&nbsp;
+![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/HTTP-Client)
+![license](https://img.shields.io/crates/l/wasmcloud-actor-http-client.svg)&nbsp;
+[![documentation](https://docs.rs/wasmcloud-actor-http-client/badge.svg)](https://docs.rs/wasmcloud-actor-http-client)
+# wasmCloud HTTP Client Actor Interface
 
 This crate provides wasmCloud actors with an interface to the HTTP client capability provider. Actors using this
 interface must have the claim `wasmcloud:httpclient` in order to have permission to make outbound HTTP requests,
