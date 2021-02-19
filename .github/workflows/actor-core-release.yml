@@ -36,7 +36,7 @@ jobs:
         run: cargo login ${{ env.CRATES_TOKEN }}
       - name: Cargo publish
         run: cargo publish --no-verify
-        working-directory: ${{ env.working-directory }}/rust
+        working-directory: ${{ env.working-directory }}/rust/wasmcloud-actor-core
 
   npm:
     needs: release
