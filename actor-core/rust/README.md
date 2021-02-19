@@ -1,23 +1,18 @@
-[![crates.io](https://img.shields.io/crates/v/wasmcloud-actor-core.svg)](https://crates.io/crates/wasmcloud-actor-core)&nbsp;
-![Rust](https://img.shields.io/github/workflow/status/wasmcloud/actor-interfaces/Actor%20Core)
-![license](https://img.shields.io/crates/l/wasmcloud-actor-core.svg)&nbsp;
-[![documentation](https://docs.rs/wasmcloud-actor-core/badge.svg)](https://docs.rs/wasmcloud-actor-core)
-# wasmCloud Core Actor Interface
+# wasmcloud Actor Core Interface (Rust)
 
-All actors must respond to the core `HealthCheckRequest` message with either an `Err`
-or a `HealthCheckResponse`. The following is an example of what an actor looks like
-that only responds to the health check message:
+The wasmcloud actor core interface contains the data types required to respond to a health check request
+as sent by the host runtime. In addition, the Rust crate has a convenience macro that allows you to define
+a simple `init` function that pre-registers a default "healthy" handler. If you want to supply your own
+health check handler, then you can do so with `Handlers::register_health_request`.
+
+Example:
 
 ```rust
- use wapc_guest::HandlerResult;
- use actorcore::{HealthCheckRequest, HealthCheckResponse, Handlers};
+extern crate wasmcloud_actor_core as actor;
 
- #[no_mangle]
- pub fn wapc_init() {
-     Handlers::register_health_request(health);
- }
-
- fn health(_msg: HealthCheckRequest) -> HandlerResult<HealthCheckResponse> {
-     Ok(HealthCheckResponse::healthy())
- }
+#[actor::init]
+pub fn init() {
+   // register handlers here
+   // default health request handler is already registered
+}
 ```

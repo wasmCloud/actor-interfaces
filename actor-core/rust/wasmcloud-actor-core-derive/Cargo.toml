@@ -1,0 +1,18 @@
+[package]
+name = "wasmcloud-actor-core-derive"
+version = "0.1.0"
+authors = ["wasmcloud Team"]
+edition = "2018"
+license = "Apache-2.0"
+documentation = "https://docs.rs/wasmcloud-actor-core"
+readme = "README.md"
+keywords = ["webassembly", "wasm", "wasmcloud", "actor"]
+categories = ["wasm", "api-bindings"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+syn = { version = "1", features = ["full"] }
+proc-macro2 = "1"
