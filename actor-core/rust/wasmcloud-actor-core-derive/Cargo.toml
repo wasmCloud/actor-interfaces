@@ -2,6 +2,7 @@
 name = "wasmcloud-actor-core-derive"
 version = "0.1.0"
 authors = ["wasmcloud Team"]
+description = "Procedural macro derive crate for wasmcloud-actor-core"
 edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/wasmcloud-actor-core"
