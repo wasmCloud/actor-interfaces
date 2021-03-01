@@ -155,7 +155,7 @@ impl Handlers {
     ///     todo!()
     /// }
     /// ```
-    pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
+    pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<BrokerMessage>) {
         *HANDLE_MESSAGE.write().unwrap() = Some(f);
         register_function(&"HandleMessage", handle_message_wrapper);
     }
@@ -163,7 +163,7 @@ impl Handlers {
 
 #[cfg(feature = "guest")]
 lazy_static! {
-    static ref HANDLE_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> =
+    static ref HANDLE_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<BrokerMessage>>> =
         RwLock::new(None);
 }
 
