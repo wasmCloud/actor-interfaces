@@ -1,15 +1,23 @@
 namespace "wasmcloud:eventstreams"
 
-interface {    
-    DeliverEvent{event: Event}: bool
-    WriteEvent(stream_id: string, values: {string: string}): string
-    QueryStream{query: StreamQuery}: [Event]
+interface {       
+    WriteEvent(streamId: string, values: {string: string}): EventAck
+    QueryStream{query: StreamQuery}: EventList
 }
 
 type Event {
     eventId: string
     streamId: string
     values: {string: string}
+}
+
+type EventAck {
+    eventId: string?
+    error: string?
+}
+
+type EventList {
+    events: [Event]
 }
 
 type StreamQuery {

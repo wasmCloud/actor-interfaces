@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-eventstreams"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the event streams contract for use by wasmCloud Actors"
@@ -11,11 +11,10 @@ keywords = ["wasm", "wasmcloud", "actor", "events"]
 categories = ["wasm", "api-bindings"]
 
 [features]
-guest = ["wapc-guest", "lazy_static"]
+guest = ["wapc-guest"]
 
 [dependencies]
 wapc-guest = { version = "0.4.0", optional = true }
-lazy_static = { version = "1.4.0", optional = true }
 
 serde = { version = "1.0.123" , features = ["derive"] }
 serde_json = "1.0.62"
@@ -23,3 +22,6 @@ serde_bytes = "0.11.5"
 rmp-serde = "0.15.4"
 log = { version="0.4.14", features =["std","serde"]}
 
+[dev-dependencies]
+wasmcloud-actor-http-server = {version = "0.1.1", features = ["guest"] }
+wasmcloud-actor-core = { version = "0.2.2", features = ["guest"] }

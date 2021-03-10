@@ -3,21 +3,16 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
+extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
-
 #[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
@@ -27,27 +22,28 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding for the key-value store capability
 #[cfg(feature = "guest")]
+/// Creates a named host binding for the event streams capability
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
     }
 }
 
-/// Creates the default host binding for the key-value store capability
 #[cfg(feature = "guest")]
+/// Creates the default host binding for the event streams capability
 pub fn default() -> Host {
     Host::default()
 }
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Writes a map of key-value pairs to the given event stream
     pub fn write_event(
         &self,
         stream_id: String,
         values: std::collections::HashMap<String, String>,
-    ) -> HandlerResult<String> {
+    ) -> HandlerResult<EventAck> {
         let input_args = WriteEventArgs {
             stream_id: stream_id,
             values: values,
@@ -59,13 +55,14 @@ impl Host {
             &serialize(input_args)?,
         )
         .map(|vec| {
-            let resp = deserialize::<String>(vec.as_ref()).unwrap();
+            let resp = deserialize::<EventAck>(vec.as_ref()).unwrap();
             resp
         })
         .map_err(|e| e.into())
     }
 
-    pub fn query_stream(&self, query: StreamQuery) -> HandlerResult<Vec<Event>> {
+    /// Queries the stream per the parameters in the supplied query
+    pub fn query_stream(&self, query: StreamQuery) -> HandlerResult<EventList> {
         host_call(
             &self.binding,
             "wasmcloud:eventstreams",
@@ -73,60 +70,16 @@ impl Host {
             &serialize(query)?,
         )
         .map(|vec| {
-            let resp = deserialize::<Vec<Event>>(vec.as_ref()).unwrap();
+            let resp = deserialize::<EventList>(vec.as_ref()).unwrap();
             resp
         })
         .map_err(|e| e.into())
     }
 }
 
-#[cfg(feature = "guest")]
-pub struct Handlers {}
-
-#[cfg(feature = "guest")]
-impl Handlers {
-    pub fn register_deliver_event(f: fn(Event) -> HandlerResult<bool>) {
-        *DELIVER_EVENT.write().unwrap() = Some(f);
-        register_function(&"DeliverEvent", deliver_event_wrapper);
-    }
-}
-
-#[cfg(feature = "guest")]
-lazy_static! {
-    static ref DELIVER_EVENT: RwLock<Option<fn(Event) -> HandlerResult<bool>>> = RwLock::new(None);
-    static ref WRITE_EVENT: RwLock<Option<fn(String, std::collections::HashMap<String, String>) -> HandlerResult<String>>> =
-        RwLock::new(None);
-    static ref QUERY_STREAM: RwLock<Option<fn(StreamQuery) -> HandlerResult<Vec<Event>>>> =
-        RwLock::new(None);
-}
-
-#[cfg(feature = "guest")]
-fn deliver_event_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<Event>(input_payload)?;
-    let lock = DELIVER_EVENT.read().unwrap().unwrap();
-    let result = lock(input)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn write_event_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<WriteEventArgs>(input_payload)?;
-    let lock = WRITE_EVENT.read().unwrap().unwrap();
-    let result = lock(input.stream_id, input.values)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn query_stream_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<StreamQuery>(input_payload)?;
-    let lock = QUERY_STREAM.read().unwrap().unwrap();
-    let result = lock(input)?;
-    Ok(serialize(result)?)
-}
-
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct WriteEventArgs {
-    #[serde(rename = "stream_id")]
+    #[serde(rename = "streamId")]
     pub stream_id: String,
     #[serde(rename = "values")]
     pub values: std::collections::HashMap<String, String>,
@@ -140,6 +93,20 @@ pub struct Event {
     pub stream_id: String,
     #[serde(rename = "values")]
     pub values: std::collections::HashMap<String, String>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct EventAck {
+    #[serde(rename = "eventId")]
+    pub event_id: Option<String>,
+    #[serde(rename = "error")]
+    pub error: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct EventList {
+    #[serde(rename = "events")]
+    pub events: Vec<Event>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
