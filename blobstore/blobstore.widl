@@ -1,15 +1,21 @@
 namespace "wasmcloud:blobstore"
 
 interface {        
-    CreateContainer(container: Container): Container
-    RemoveContainer(container: Container): void
-    RemoveObject(blob: Blob): void
-    ListObjects(container: Container): BlobList
-    UploadChunk(chunk: FileChunk): void
-    StartDownload(request: StreamRequest): void
-    StartUpload(blob: FileChunk): void
-    ReceiveChunk(chunk: FileChunk): void
-    GetObjectInfo(blob: Blob): Blob
+    CreateContainer(id: string): Container
+    RemoveContainer(id: string): BlobstoreResult
+    RemoveObject(id: string, container_id: string): BlobstoreResult
+    ListObjects(container_id: string): BlobList
+    UploadChunk{chunk: FileChunk}: void
+    StartDownload(blob_id: string, container_id: string, chunk_size: u64, context: string?): BlobstoreResult
+    StartUpload{blob: FileChunk}: BlobstoreResult    
+    GetObjectInfo(blob_id: string, container_id: string): Blob
+
+    ReceiveChunk{chunk: FileChunk}: void
+}
+
+type BlobstoreResult {
+    success: bool
+    error: string?
 }
 
 type FileChunk {
