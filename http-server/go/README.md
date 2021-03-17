@@ -1,4 +1,4 @@
-# wasmCloud Core Actor Interface
+# wasmCloud HTTP Server Actor Interface
 
 This actor interface provides wasmCloud actors with an interface to the HTTP Server capability provider. Actors using this
 interface must have the claim `wasmcloud:httpserver` in order to have permission to handle requests, and they
