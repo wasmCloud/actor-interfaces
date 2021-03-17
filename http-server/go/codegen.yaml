@@ -1,0 +1,7 @@
+schema: ../http.widl
+generates:
+  httpserver.go:
+    package: widl-codegen/language/tinygo
+    visitorClass: ModuleVisitor
+    config:
+      package: httpserver
