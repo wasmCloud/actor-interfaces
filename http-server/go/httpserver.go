@@ -5,29 +5,6 @@ import (
 	wapc "github.com/wapc/wapc-guest-tinygo"
 )
 
-type Host struct {
-	binding string
-}
-
-func NewHost(binding string) *Host {
-	return &Host{
-		binding: binding,
-	}
-}
-
-func (h *Host) HandleRequest(request Request) (Response, error) {
-	inputBytes, err := msgpack.ToBytes(&request)
-	if err != nil {
-		return Response{}, err
-	}
-	payload, err := wapc.HostCall(h.binding, "wasmcloud:httpserver", "HandleRequest", inputBytes)
-	if err != nil {
-		return Response{}, err
-	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeResponse(&decoder)
-}
-
 type Handlers struct {
 	HandleRequest func(request Request) (Response, error)
 }
