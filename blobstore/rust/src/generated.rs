@@ -28,26 +28,25 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding
 #[cfg(feature = "guest")]
+/// Creates a reference a blob store capability provider with the given link name
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
     }
 }
 
-/// Creates the default host binding
 #[cfg(feature = "guest")]
+/// Creates a reference to the default blob store capability provider
 pub fn default() -> Host {
     Host::default()
 }
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub fn create_container(&self, container: Container) -> HandlerResult<Container> {
-        let input_args = CreateContainerArgs {
-            container_id: container,
-        };
+    /// Creates a new container with the given ID
+    pub fn create_container(&self, id: String) -> HandlerResult<Container> {
+        let input_args = CreateContainerArgs { id: id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -61,35 +60,49 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    pub fn remove_container(&self, container: Container) -> HandlerResult<()> {
-        let input_args = RemoveContainerArgs {
-            container: container,
-        };
+    /// Removes the indicated container, if possible
+    pub fn remove_container(&self, id: String) -> HandlerResult<BlobstoreResult> {
+        let input_args = RemoveContainerArgs { id: id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "RemoveContainer",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
 
-    pub fn remove_object(&self, blob: Blob) -> HandlerResult<()> {
-        let input_args = RemoveObjectArgs { blob: blob };
+    /// Removes a blob from within the given container, if possible
+    pub fn remove_object(
+        &self,
+        id: String,
+        container_id: String,
+    ) -> HandlerResult<BlobstoreResult> {
+        let input_args = RemoveObjectArgs {
+            id: id,
+            container_id: container_id,
+        };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "RemoveObject",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
 
-    pub fn list_objects(&self, container: Container) -> HandlerResult<BlobList> {
+    /// Lists all of the blob entries within the given container
+    pub fn list_objects(&self, container_id: String) -> HandlerResult<BlobList> {
         let input_args = ListObjectsArgs {
-            container: container,
+            container_id: container_id,
         };
         host_call(
             &self.binding,
@@ -104,56 +117,67 @@ impl Host {
         .map_err(|e| e.into())
     }
 
+    /// Uploads a chunk of a file to the host. Must only be called _after_ calling `start_upload`
     pub fn upload_chunk(&self, chunk: FileChunk) -> HandlerResult<()> {
-        let input_args = UploadChunkArgs { chunk: chunk };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "UploadChunk",
-            &serialize(input_args)?,
+            &serialize(chunk)?,
         )
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
 
-    pub fn start_download(&self, request: StreamRequest) -> HandlerResult<()> {
-        let input_args = StartDownloadArgs { request: request };
+    /// Indicates to the capability provider that the actor would like to start receiving chunks for the
+    /// given blob in the indicated container
+    pub fn start_download(
+        &self,
+        blob_id: String,
+        container_id: String,
+        chunk_size: u64,
+        context: Option<String>,
+    ) -> HandlerResult<BlobstoreResult> {
+        let input_args = StartDownloadArgs {
+            blob_id: blob_id,
+            container_id: container_id,
+            chunk_size: chunk_size,
+            context: context,
+        };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "StartDownload",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
 
-    pub fn start_upload(&self, blob: FileChunk) -> HandlerResult<()> {
-        let input_args = StartUploadArgs { blob: blob };
+    /// Starts an upload with the capability provider. This must be called before invoking `upload_chunk`
+    pub fn start_upload(&self, blob: FileChunk) -> HandlerResult<BlobstoreResult> {
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "StartUpload",
-            &serialize(input_args)?,
+            &serialize(blob)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
 
-    pub fn receive_chunk(&self, chunk: FileChunk) -> HandlerResult<()> {
-        let input_args = ReceiveChunkArgs { chunk: chunk };
-        host_call(
-            &self.binding,
-            "wasmcloud:blobstore",
-            "ReceiveChunk",
-            &serialize(input_args)?,
-        )
-        .map(|_vec| ())
-        .map_err(|e| e.into())
-    }
-
-    pub fn get_object_info(&self, blob: Blob) -> HandlerResult<Blob> {
-        let input_args = GetObjectInfoArgs { blob: blob };
+    /// Retrieves metadata associated with the given blob in the indicated container
+    pub fn get_object_info(&self, blob_id: String, container_id: String) -> HandlerResult<Blob> {
+        let input_args = GetObjectInfoArgs {
+            blob_id: blob_id,
+            container_id: container_id,
+        };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -173,186 +197,79 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    pub fn register_create_container(f: fn(Container) -> HandlerResult<Container>) {
-        *CREATE_CONTAINER.write().unwrap() = Some(f);
-        register_function(&"CreateContainer", create_container_wrapper);
-    }
-    pub fn register_remove_container(f: fn(Container) -> HandlerResult<()>) {
-        *REMOVE_CONTAINER.write().unwrap() = Some(f);
-        register_function(&"RemoveContainer", remove_container_wrapper);
-    }
-    pub fn register_remove_object(f: fn(Blob) -> HandlerResult<()>) {
-        *REMOVE_OBJECT.write().unwrap() = Some(f);
-        register_function(&"RemoveObject", remove_object_wrapper);
-    }
-    pub fn register_list_objects(f: fn(Container) -> HandlerResult<BlobList>) {
-        *LIST_OBJECTS.write().unwrap() = Some(f);
-        register_function(&"ListObjects", list_objects_wrapper);
-    }
-    pub fn register_upload_chunk(f: fn(FileChunk) -> HandlerResult<()>) {
-        *UPLOAD_CHUNK.write().unwrap() = Some(f);
-        register_function(&"UploadChunk", upload_chunk_wrapper);
-    }
-    pub fn register_start_download(f: fn(StreamRequest) -> HandlerResult<()>) {
-        *START_DOWNLOAD.write().unwrap() = Some(f);
-        register_function(&"StartDownload", start_download_wrapper);
-    }
-    pub fn register_start_upload(f: fn(FileChunk) -> HandlerResult<()>) {
-        *START_UPLOAD.write().unwrap() = Some(f);
-        register_function(&"StartUpload", start_upload_wrapper);
-    }
+    /// Sets a handler for receiving file chunks from the capability provider
     pub fn register_receive_chunk(f: fn(FileChunk) -> HandlerResult<()>) {
         *RECEIVE_CHUNK.write().unwrap() = Some(f);
         register_function(&"ReceiveChunk", receive_chunk_wrapper);
-    }
-    pub fn register_get_object_info(f: fn(Blob) -> HandlerResult<Blob>) {
-        *GET_OBJECT_INFO.write().unwrap() = Some(f);
-        register_function(&"GetObjectInfo", get_object_info_wrapper);
     }
 }
 
 #[cfg(feature = "guest")]
 lazy_static! {
-    static ref CREATE_CONTAINER: RwLock<Option<fn(Container) -> HandlerResult<Container>>> =
-        RwLock::new(None);
-    static ref REMOVE_CONTAINER: RwLock<Option<fn(Container) -> HandlerResult<()>>> =
-        RwLock::new(None);
-    static ref REMOVE_OBJECT: RwLock<Option<fn(Blob) -> HandlerResult<()>>> = RwLock::new(None);
-    static ref LIST_OBJECTS: RwLock<Option<fn(Container) -> HandlerResult<BlobList>>> =
-        RwLock::new(None);
-    static ref UPLOAD_CHUNK: RwLock<Option<fn(FileChunk) -> HandlerResult<()>>> = RwLock::new(None);
-    static ref START_DOWNLOAD: RwLock<Option<fn(StreamRequest) -> HandlerResult<()>>> =
-        RwLock::new(None);
-    static ref START_UPLOAD: RwLock<Option<fn(FileChunk) -> HandlerResult<()>>> = RwLock::new(None);
     static ref RECEIVE_CHUNK: RwLock<Option<fn(FileChunk) -> HandlerResult<()>>> =
         RwLock::new(None);
-    static ref GET_OBJECT_INFO: RwLock<Option<fn(Blob) -> HandlerResult<Blob>>> = RwLock::new(None);
-}
-
-#[cfg(feature = "guest")]
-fn create_container_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<CreateContainerArgs>(input_payload)?;
-    let lock = CREATE_CONTAINER.read().unwrap().unwrap();
-    let result = lock(input.container_id)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn remove_container_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<RemoveContainerArgs>(input_payload)?;
-    let lock = REMOVE_CONTAINER.read().unwrap().unwrap();
-    let result = lock(input.container)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn remove_object_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<RemoveObjectArgs>(input_payload)?;
-    let lock = REMOVE_OBJECT.read().unwrap().unwrap();
-    let result = lock(input.blob)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn list_objects_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<ListObjectsArgs>(input_payload)?;
-    let lock = LIST_OBJECTS.read().unwrap().unwrap();
-    let result = lock(input.container)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn upload_chunk_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<UploadChunkArgs>(input_payload)?;
-    let lock = UPLOAD_CHUNK.read().unwrap().unwrap();
-    let result = lock(input.chunk)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn start_download_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<StartDownloadArgs>(input_payload)?;
-    let lock = START_DOWNLOAD.read().unwrap().unwrap();
-    let result = lock(input.request)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn start_upload_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<StartUploadArgs>(input_payload)?;
-    let lock = START_UPLOAD.read().unwrap().unwrap();
-    let result = lock(input.blob)?;
-    Ok(serialize(result)?)
 }
 
 #[cfg(feature = "guest")]
 fn receive_chunk_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<ReceiveChunkArgs>(input_payload)?;
+    let input = deserialize::<FileChunk>(input_payload)?;
     let lock = RECEIVE_CHUNK.read().unwrap().unwrap();
-    let result = lock(input.chunk)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn get_object_info_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<GetObjectInfoArgs>(input_payload)?;
-    let lock = GET_OBJECT_INFO.read().unwrap().unwrap();
-    let result = lock(input.blob)?;
+    let result = lock(input)?;
     Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct CreateContainerArgs {
-    #[serde(rename = "container")]
-    pub container_id: Container,
+    #[serde(rename = "id")]
+    pub id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct RemoveContainerArgs {
-    #[serde(rename = "container")]
-    pub container: Container,
+    #[serde(rename = "id")]
+    pub id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct RemoveObjectArgs {
-    #[serde(rename = "blob")]
-    pub blob: Blob,
+    #[serde(rename = "id")]
+    pub id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListObjectsArgs {
-    #[serde(rename = "container")]
-    pub container: Container,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct UploadChunkArgs {
-    #[serde(rename = "chunk")]
-    pub chunk: FileChunk,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StartDownloadArgs {
-    #[serde(rename = "request")]
-    pub request: StreamRequest,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct StartUploadArgs {
-    #[serde(rename = "blob")]
-    pub blob: FileChunk,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct ReceiveChunkArgs {
-    #[serde(rename = "chunk")]
-    pub chunk: FileChunk,
+    #[serde(rename = "blob_id")]
+    pub blob_id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
+    #[serde(rename = "chunk_size")]
+    pub chunk_size: u64,
+    #[serde(rename = "context")]
+    pub context: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct GetObjectInfoArgs {
-    #[serde(rename = "blob")]
-    pub blob: Blob,
+    #[serde(rename = "blob_id")]
+    pub blob_id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct BlobstoreResult {
+    #[serde(rename = "success")]
+    pub success: bool,
+    #[serde(rename = "error")]
+    pub error: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
