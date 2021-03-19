@@ -1,0 +1,7 @@
+schema: ../logging.widl
+generates:
+  logging.go:
+    package: widl-codegen/language/tinygo
+    visitorClass: ModuleVisitor
+    config:
+      package: logging
