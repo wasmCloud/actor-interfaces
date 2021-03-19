@@ -17,5 +17,5 @@ Here is a list of the wasmCloud-supported actor interfaces in this repository. T
 | [GraphDB](./graphdb/graphdb.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-graphdb)](https://crates.io/crates/wasmcloud-actor-graphdb)  | ⛔ | ⛔ |
 | [Blob Store](./blobstore/blobstore.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-blobstore)](https://crates.io/crates/wasmcloud-actor-blobstore)  | ⛔ | ⛔ |
 | [Event Streams](./eventstreams/eventstreams.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-eventstreams)](https://crates.io/crates/wasmcloud-actor-eventstreams)  | ⛔ | ⛔ |
-| [Logging](./logging/logging.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-logging)](https://crates.io/crates/wasmcloud-actor-logging)  | ⛔ | ⛔ |
+| [Logging](./logging/logging.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-logging)](https://crates.io/crates/wasmcloud-actor-logging)  | [![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/wasmcloud/actor-interfaces?filename=logging%2Fgo%2Fgo.mod)](https://pkg.go.dev/github.com/wasmcloud/actor-interfaces/logging/go) | ⛔ |
 | [Extras](./extras/extras.widl) |  [![Crates.io](https://img.shields.io/crates/v/wasmcloud-actor-extras)](https://crates.io/crates/wasmcloud-actor-extras)  | ⛔ | ⛔ |
