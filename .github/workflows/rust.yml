@@ -1,0 +1,36 @@
+name: Actor Core
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - "*/rust/**"
+  pull_request:
+    branches: [ main ]
+    paths:
+    - "*/rust/**"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        actors: ${{fromJson(ls -d -1 * | while read line; do echo \"$line\"; done | tr '\n' ',' | sed -e 's/^ //' -e 's/,$//' | (read; echo [$REPLY])}}
+    steps:
+    - uses: actions/checkout@v2
+    - run: cargo clippy --all-features
+    - name: Build
+      run: cargo build --verbose
+      working-directory: ${{matrix.actors}}/rust
+    - name: Run tests
+      run: cargo test --features "guest" --verbose
+      working-directory: ${{matrix.actors}}/rust
+    - name: Check fmt
+      run: cargo fmt -- --check
+      working-directory: ${{matrix.actors}}/rust
+    - name: Run cargo clippy
+      run: cargo clippy --all-features
+      working-directory: ${{matrix.actors}}/rust
