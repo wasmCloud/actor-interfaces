@@ -16,4 +16,3 @@ pub fn init() {
    // default health request handler is already registered
 }
 ```
-bump
