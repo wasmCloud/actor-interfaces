@@ -37,3 +37,15 @@ jobs:
       - name: Cargo publish
         run: cargo publish --no-verify
         working-directory: ${{ env.working-directory }}/rust
+
+  npm:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: NPM Publish
+        run: npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: ${{ env.working-directory }}/assemblyscript
