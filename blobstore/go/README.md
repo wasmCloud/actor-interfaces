@@ -1,6 +1,6 @@
 # wasmCloud Blobstore Actor Interface
  
-This crate provides wasmCloud actors with an interface to the blobstore capability provider.
+This package provides wasmCloud actors with an interface to the blobstore capability provider.
 Actors using this interface must have the claim `wasmcloud:blobstore` in order to have
 permission to communicate with the store.
 
@@ -19,19 +19,19 @@ import (
 )
 
 func main() {
-	core.Handlers{HealthRequest: healthRequest}.Register()
-	httpserver.Handlers{HandleRequest: handleRequest}.Register()
-  blob.Handlers{ReceiveChunk: receiveChunk}.Register()
+    core.Handlers{HealthRequest: healthRequest}.Register()
+    httpserver.Handlers{HandleRequest: handleRequest}.Register()
+    blob.Handlers{ReceiveChunk: receiveChunk}.Register()
 }
 
 func receiveChunk(chunk blob.FileChunk) error {
-  // ReceiveChunk is used to process incoming file chunks, as downloading an entire file
-  // may exceed the memory capacity of the WebAssembly module.
-  // 
-  // This is effectively streaming a file download to the module, so you must use
-  // the chunk `Context`, `TotalBytes` and `ChunkBytes` fields to determine
-  // when you have received all of the bytes for a file.
-  return nil
+    // ReceiveChunk is used to process incoming file chunks, as downloading an entire file
+    // may exceed the memory capacity of the WebAssembly module.
+    // 
+    // This is effectively streaming a file download to the module, so you must use
+    // the chunk `Context`, `TotalBytes` and `ChunkBytes` fields to determine
+    // when you have received all of the bytes for a file.
+    return nil
 }
 
 func handleRequest(request httpserver.Request) (httpserver.Response, error) {
@@ -49,9 +49,8 @@ func handleRequest(request httpserver.Request) (httpserver.Response, error) {
 	}
 }
 
-var blobStore *blob.Host
 func downloadImage() (httpserver.Response, error) {
-	blobStore = blob.NewHost("default")
+	blobStore := blob.NewHost("default")
 	blobStore.StartDownload("myblob", "folder", 512, nil)
 	return httpserver.Response{
 		StatusCode: 200,
@@ -61,7 +60,7 @@ func downloadImage() (httpserver.Response, error) {
 }
 
 func uploadImage(path string, imageBytes []byte) (httpserver.Response, error) {
-    blobStore = blob.NewHost("default")
+	blobStore := blob.NewHost("default")
     container := blob.Container {
         ID: "folder",
     }

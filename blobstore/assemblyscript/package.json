@@ -1,11 +1,11 @@
 {
-  "name": "assemblyscript",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "@wasmcloud/actor-blobstore",
+  "version": "0.1.0",
+  "description": "Interface to the blobstore contract for use by wasmCloud Actors",
+  "author": "wasmCloud team",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "asc assembly/index.ts -b build/assemblyscript.wasm --use abort=assembly/index/abort --optimize"
+    "build": "asc assembly/index.ts -b build/blobstore.wasm --use abort=assembly/index/abort --optimize"
   },
   "license": "ISC",
   "dependencies": {

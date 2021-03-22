@@ -1,6 +1,6 @@
 # wasmCloud Blobstore Actor Interface
  
-This crate provides wasmCloud actors with an interface to the blobstore capability provider.
+This module provides wasmCloud actors with an interface to the blobstore capability provider.
 Actors using this interface must have the claim `wasmcloud:blobstore` in order to have
 permission to communicate with the store.
 
@@ -10,7 +10,7 @@ Amazon S3, Azure blob storage, Google blob storage, and more.
 ## Sample Actor
 ```typescript
 import { Request, Response, ResponseBuilder, Handlers as HTTPHandlers } from "@wasmcloud/actor-http-server";
-import { Host as Blob, ContainerBuilder, FileChunk, FileChunkBuilder, Handlers as BlobHandlers } from "../../../../../github.com/wasmcloud/actor-interfaces/blobstore/assemblyscript/assembly/module";
+import { Host as Blob, ContainerBuilder, FileChunk, FileChunkBuilder, Handlers as BlobHandlers } from "@wasmcloud/actor-blobstore";
 import { HealthCheckResponse, HealthCheckRequest, Handlers as CoreHandlers, HealthCheckResponseBuilder } from "@wasmcloud/actor-core";
 
 export function wapc_init(): void {
