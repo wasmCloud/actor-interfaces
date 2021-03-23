@@ -33,3 +33,7 @@
 mod generated;
 
 pub use generated::*;
+
+pub const OP_SEND_TEXT: &str = "SendText";
+pub const OP_SESSION_STARTED: &str = "SessionStarted";
+pub const OP_RECEIVE_TEXT: &str = "ReceiveText";
