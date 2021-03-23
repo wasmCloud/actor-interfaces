@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[cfg(feature = "guest")]
+use crate::{OP_RECEIVE_TEXT, OP_SEND_TEXT, OP_SESSION_STARTED};
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
@@ -27,7 +29,7 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding for the key-value store capability
+/// Creates a named host binding for the telnet capability
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
@@ -35,7 +37,7 @@ pub fn host(binding: &str) -> Host {
     }
 }
 
-/// Creates the default host binding for the key-value store capability
+/// Creates the default host binding for the telnet capability
 #[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
@@ -54,7 +56,7 @@ impl Host {
         host_call(
             &self.binding,
             "wasmcloud:telnet",
-            "SendText",
+            OP_SEND_TEXT,
             &serialize(input_args)?,
         )
         .map(|vec| {
@@ -72,11 +74,11 @@ pub struct Handlers {}
 impl Handlers {
     pub fn register_session_started(f: fn(String) -> HandlerResult<bool>) {
         *SESSION_STARTED.write().unwrap() = Some(f);
-        register_function(&"SessionStarted", session_started_wrapper);
+        register_function(&OP_SESSION_STARTED, session_started_wrapper);
     }
     pub fn register_receive_text(f: fn(String, String) -> HandlerResult<bool>) {
         *RECEIVE_TEXT.write().unwrap() = Some(f);
-        register_function(&"ReceiveText", receive_text_wrapper);
+        register_function(&OP_RECEIVE_TEXT, receive_text_wrapper);
     }
 }
 
@@ -85,8 +87,6 @@ lazy_static! {
     static ref SESSION_STARTED: RwLock<Option<fn(String) -> HandlerResult<bool>>> =
         RwLock::new(None);
     static ref RECEIVE_TEXT: RwLock<Option<fn(String, String) -> HandlerResult<bool>>> =
-        RwLock::new(None);
-    static ref SEND_TEXT: RwLock<Option<fn(String, String) -> HandlerResult<bool>>> =
         RwLock::new(None);
 }
 
@@ -102,14 +102,6 @@ fn session_started_wrapper(input_payload: &[u8]) -> CallResult {
 fn receive_text_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<ReceiveTextArgs>(input_payload)?;
     let lock = RECEIVE_TEXT.read().unwrap().unwrap();
-    let result = lock(input.session, input.text)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn send_text_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<SendTextArgs>(input_payload)?;
-    let lock = SEND_TEXT.read().unwrap().unwrap();
     let result = lock(input.session, input.text)?;
     Ok(serialize(result)?)
 }
