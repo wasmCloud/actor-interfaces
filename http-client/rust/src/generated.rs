@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[cfg(feature = "guest")]
+use crate::OP_REQUEST;
+#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
@@ -58,7 +60,7 @@ impl Host {
         host_call(
             &self.binding,
             "wasmcloud:httpclient",
-            "Request",
+            OP_REQUEST,
             &serialize(input_args)?,
         )
         .map(|vec| {
