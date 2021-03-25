@@ -60,4 +60,4 @@ use guest::prelude::*;
 mod generated;
 pub use generated::*;
 
-pub const OP_PERFORM_REQUEST: &str = "PerformRequest";
+pub const OP_REQUEST: &str = "Request";
