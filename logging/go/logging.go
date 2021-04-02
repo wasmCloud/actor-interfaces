@@ -25,7 +25,7 @@ func (h *Host) WriteLog(target string, level string, text string) error {
 	if err != nil {
 		return err
 	}
-	_, err := wapc.HostCall(
+	_, err = wapc.HostCall(
 		h.binding,
 		"wasmcloud:logging",
 		"WriteLog",
