@@ -8,23 +8,29 @@
 //! # Example:
 //! ```
 //! extern crate wasmcloud_actor_telnet as telnet;
-//! // extern crate wasmcloud_actor_core as actorcore;
+//! extern crate wasmcloud_actor_core as actorcore;
+//! use telnet::TelnetResult;
 //! use wapc_guest::HandlerResult;
 //!
-//! #[no_mangle]
-//! pub fn wapc_init() {
+//! #[actorcore::init]
+//! pub fn init() {
 //!     telnet::Handlers::register_session_started(session_started);
 //!     telnet::Handlers::register_receive_text(receive_text);
-//!//     actorcore::Handlers::register_health_request(health);
 //! }
 //!
-//! fn session_started(session: String) -> HandlerResult<bool> {
+//! fn session_started(session: String) -> HandlerResult<TelnetResult> {
 //!    let _ = telnet::default().send_text(session, "Welcome to the Interwebs!\n".to_string());
-//!    Ok(true)
+//!    Ok(TelnetResult {
+//!      success: true,
+//!      error: None,
+//!    })
 //! }
-//! fn receive_text(session: String, text: String) -> HandlerResult<bool> {
+//! fn receive_text(session: String, text: String) -> HandlerResult<TelnetResult> {
 //!    let _ = telnet::default().send_text(session, format!("Echo: {}\n", text));
-//!    Ok(true)
+//!    Ok(TelnetResult {
+//!      success: true,
+//!      error: None,
+//!    })
 //! }
 //!
 //! ```

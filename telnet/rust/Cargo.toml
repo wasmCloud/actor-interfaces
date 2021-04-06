@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-telnet"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2018"
 description = "Actor interface for the wasmCloud telnet capability provider"
 authors = ["wasmCloud Team"]
@@ -19,7 +19,15 @@ rmp-serde = "0.15.4"
 serde = { version = "1.0.125" , features = ["derive"] }
 lazy_static = "1.4.0"
 
+[dev-dependencies]
+wasmcloud-actor-core = { version = "0.2.2", features = ["guest"] }
+
 [profile.release]
 # Optimize for small code size
 opt-level = "s"
 lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

@@ -4,8 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[cfg(feature = "guest")]
-use crate::{OP_RECEIVE_TEXT, OP_SEND_TEXT, OP_SESSION_STARTED};
-#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
@@ -48,19 +46,16 @@ impl Host {
     /// Sends a string of text to a given session. The provider is not responsible for
     /// indicating if this is a valid session or not. The telnet provider will not automatically
     /// add newlines or carriage returns.
-    pub fn send_text(&self, session: String, text: String) -> HandlerResult<bool> {
-        let input_args = SendTextArgs {
-            session: session,
-            text: text,
-        };
+    pub fn send_text(&self, session: String, text: String) -> HandlerResult<TelnetResult> {
+        let input_args = SendTextArgs { session, text };
         host_call(
             &self.binding,
             "wasmcloud:telnet",
-            OP_SEND_TEXT,
+            "SendText",
             &serialize(input_args)?,
         )
         .map(|vec| {
-            let resp = deserialize::<bool>(vec.as_ref()).unwrap();
+            let resp = deserialize::<TelnetResult>(vec.as_ref()).unwrap();
             resp
         })
         .map_err(|e| e.into())
@@ -72,21 +67,24 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    pub fn register_session_started(f: fn(String) -> HandlerResult<bool>) {
+    /// Register a function to receive session information when a user connects
+    /// to the linked telnet provider
+    pub fn register_session_started(f: fn(String) -> HandlerResult<TelnetResult>) {
         *SESSION_STARTED.write().unwrap() = Some(f);
-        register_function(&OP_SESSION_STARTED, session_started_wrapper);
+        register_function(&"SessionStarted", session_started_wrapper);
     }
-    pub fn register_receive_text(f: fn(String, String) -> HandlerResult<bool>) {
+    /// Register a function to handle text received from the linked telnet provider
+    pub fn register_receive_text(f: fn(String, String) -> HandlerResult<TelnetResult>) {
         *RECEIVE_TEXT.write().unwrap() = Some(f);
-        register_function(&OP_RECEIVE_TEXT, receive_text_wrapper);
+        register_function(&"ReceiveText", receive_text_wrapper);
     }
 }
 
 #[cfg(feature = "guest")]
 lazy_static! {
-    static ref SESSION_STARTED: RwLock<Option<fn(String) -> HandlerResult<bool>>> =
+    static ref SESSION_STARTED: RwLock<Option<fn(String) -> HandlerResult<TelnetResult>>> =
         RwLock::new(None);
-    static ref RECEIVE_TEXT: RwLock<Option<fn(String, String) -> HandlerResult<bool>>> =
+    static ref RECEIVE_TEXT: RwLock<Option<fn(String, String) -> HandlerResult<TelnetResult>>> =
         RwLock::new(None);
 }
 
@@ -126,6 +124,14 @@ pub struct SendTextArgs {
     pub session: String,
     #[serde(rename = "text")]
     pub text: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct TelnetResult {
+    #[serde(rename = "success")]
+    pub success: bool,
+    #[serde(rename = "error")]
+    pub error: Option<String>,
 }
 
 /// The standard function for serializing codec structs into a format that can be
