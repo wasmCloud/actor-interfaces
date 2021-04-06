@@ -6,26 +6,33 @@ use std::io::Cursor;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
-use crate::{set_binding, CURRENT_BINDING};
-#[cfg(feature = "guest")]
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-pub struct Host {}
+use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
+use std::sync::RwLock;
+
+#[cfg(feature = "guest")]
+pub struct Host {
+    binding: String,
+}
 
 #[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
-        set_binding("default");
-        Host {}
+        Host {
+            binding: "default".to_string(),
+        }
     }
 }
 
 /// Creates a named host binding
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
-    set_binding(binding);
-    Host {}
+    Host {
+        binding: binding.to_string(),
+    }
 }
 
 /// Creates the default host binding
@@ -36,19 +43,14 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub(crate) fn _write_log(
-        &self,
-        target: String,
-        level: String,
-        text: String,
-    ) -> HandlerResult<()> {
+    pub fn write_log(&self, target: String, level: String, text: String) -> HandlerResult<()> {
         let input_args = WriteLogArgs {
             target,
             level,
             text,
         };
         host_call(
-            &CURRENT_BINDING.read().unwrap(),
+            &self.binding,
             "wasmcloud:logging",
             "WriteLog",
             &serialize(input_args)?,

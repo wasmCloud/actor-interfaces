@@ -43,25 +43,6 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Publishes a message on a given subject with an optional reply subject
-    ///
-    /// # Arguments
-    ///
-    /// * `subject` - Message subject
-    /// * `reply_to` - Subject to receive message replies. Can be left blank for no reply subject
-    /// * `body` - Message payload
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// fn send_message() {
-    ///     let subject = "first.app".to_string();
-    ///     let reply_to = "".to_string();
-    ///     let body = "hello world".to_string().into_bytes();
-    ///     
-    ///     messaging::default().publish(subject, reply_to, body);
-    /// }
-    /// ```
     pub fn publish(
         &self,
         subject: String,
@@ -86,26 +67,6 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    /// Publishes a message and expects a reply within a given timeout
-    ///
-    /// # Arguments
-    ///
-    /// * `subject` - Message subject
-    /// * `body` - Message payload
-    /// * `timeout` - Timeout, in milliseconds, to wait for a message reply
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// fn hello_there() {
-    ///     let subject = "first.app".to_string();
-    ///     let body = "hello?".to_string().into_bytes();
-    ///     let timeout = 1000;
-    ///     
-    ///     let response = messaging::default().request(subject, body, timeout).unwrap();
-    ///     assert_eq!(String::from_utf8(response.body).unwrap(), "world!");
-    /// }
-    /// ```
     pub fn request(
         &self,
         subject: String,
@@ -136,25 +97,6 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// Registers a function to be invoked upon receiving a message.
-    /// This function should be called with the `wapc_init` block of an
-    /// actor module.
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wapc_guest as guest;
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// use guest::prelude::*;
-    ///
-    /// #[no_mangle]
-    /// pub fn wapc_init() {
-    ///     messaging::Handlers::register_handle_message(handle_message);
-    /// }
-    ///
-    /// fn handle_message(_msg: messaging::BrokerMessage) -> HandlerResult<()> {
-    ///     todo!()
-    /// }
-    /// ```
     pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
         *HANDLE_MESSAGE.write().unwrap() = Some(f);
         register_function(&"HandleMessage", handle_message_wrapper);

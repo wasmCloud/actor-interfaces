@@ -1,8 +1,12 @@
 namespace "wasmcloud:eventstreams"
 
-interface {       
+role Producer {    
     WriteEvent(streamId: string, values: {string: string}): EventAck
     QueryStream{query: StreamQuery}: EventList
+}
+
+role Consumer {    
+    DeliverEvent{event: Event}: bool
 }
 
 type Event {

@@ -8,8 +8,8 @@ deps:
 codegen:
 	wapc generate codegen.yaml
 
-build:
-	npm run build
+#build:
+#	npm run build
 
 clean:
 	rm -Rf build

@@ -1,8 +1,11 @@
 namespace "wasmcloud:messaging"
 
-interface {    
+role Broker {    
     Publish(subject: string, replyTo: string, body: bytes): PublishResponse
     Request(subject: string, body: bytes, timeout: i64): BrokerMessage
+}
+
+role Consumer {
     HandleMessage{message: BrokerMessage}: void
 }
 

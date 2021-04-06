@@ -1,11 +1,14 @@
 schema: ../logging.widl
 generates:
   src/generated.rs:
-    package: widl-codegen/language/rust
+    module: '@wapc/widl-codegen/rust'
     visitorClass: ModuleVisitor
+    config:
+      hostRoles:
+        - Logger
   src/lib.rs:
     ifNotExists: true
-    package: widl-codegen/language/rust
+    module: '@wapc/widl-codegen/rust'
     visitorClass: ScaffoldVisitor
     config:
       use: generated

@@ -11,20 +11,20 @@ type Handlers struct {
 
 func (h Handlers) Register() {
 	if h.HandleRequest != nil {
-		HandleRequestHandler = h.HandleRequest
-		wapc.RegisterFunction("HandleRequest", HandleRequestWrapper)
+		handleRequestHandler = h.HandleRequest
+		wapc.RegisterFunction("HandleRequest", handleRequestWrapper)
 	}
 }
 
 var (
-	HandleRequestHandler func(request Request) (Response, error)
+	handleRequestHandler func(request Request) (Response, error)
 )
 
-func HandleRequestWrapper(payload []byte) ([]byte, error) {
+func handleRequestWrapper(payload []byte) ([]byte, error) {
 	decoder := msgpack.NewDecoder(payload)
 	var request Request
 	request.Decode(&decoder)
-	response, err := HandleRequestHandler(request)
+	response, err := handleRequestHandler(request)
 	if err != nil {
 		return nil, err
 	}

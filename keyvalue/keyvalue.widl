@@ -1,6 +1,6 @@
 namespace "wasmcloud:keyvalue"
 
-interface {
+role Store {
     Get(key: string): GetResponse
     Add(key: string, value: i32): AddResponse
     Set(key: string, value: string, expires: i32): SetResponse 

@@ -3,7 +3,6 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
@@ -44,11 +43,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    pub(crate) fn query(&self, graphName: String, query: String) -> HandlerResult<QueryResponse> {
-        let input_args = QueryGraphArgs {
-            graph_name: graphName,
-            query: query,
-        };
+    pub fn query_graph(&self, graph_name: String, query: String) -> HandlerResult<QueryResponse> {
+        let input_args = QueryGraphArgs { graph_name, query };
         host_call(
             &self.binding,
             "wasmcloud:graphdb",
@@ -62,10 +58,8 @@ impl Host {
         .map_err(|e| e.into())
     }
 
-    pub fn delete_graph(&self, graphName: String) -> HandlerResult<DeleteResponse> {
-        let input_args = DeleteGraphArgs {
-            graph_name: graphName,
-        };
+    pub fn delete_graph(&self, graph_name: String) -> HandlerResult<DeleteResponse> {
+        let input_args = DeleteGraphArgs { graph_name };
         host_call(
             &self.binding,
             "wasmcloud:graphdb",
@@ -78,45 +72,6 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-}
-
-#[cfg(feature = "guest")]
-pub struct Handlers {}
-
-#[cfg(feature = "guest")]
-impl Handlers {
-    pub fn register_query_graph(f: fn(String, String) -> HandlerResult<QueryResponse>) {
-        *QUERY_GRAPH.write().unwrap() = Some(f);
-        register_function(&"QueryGraph", query_graph_wrapper);
-    }
-    pub fn register_delete_graph(f: fn(String) -> HandlerResult<DeleteResponse>) {
-        *DELETE_GRAPH.write().unwrap() = Some(f);
-        register_function(&"DeleteGraph", delete_graph_wrapper);
-    }
-}
-
-#[cfg(feature = "guest")]
-lazy_static! {
-    static ref QUERY_GRAPH: RwLock<Option<fn(String, String) -> HandlerResult<QueryResponse>>> =
-        RwLock::new(None);
-    static ref DELETE_GRAPH: RwLock<Option<fn(String) -> HandlerResult<DeleteResponse>>> =
-        RwLock::new(None);
-}
-
-#[cfg(feature = "guest")]
-fn query_graph_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<QueryGraphArgs>(input_payload)?;
-    let lock = QUERY_GRAPH.read().unwrap().unwrap();
-    let result = lock(input.graph_name, input.query)?;
-    Ok(serialize(result)?)
-}
-
-#[cfg(feature = "guest")]
-fn delete_graph_wrapper(input_payload: &[u8]) -> CallResult {
-    let input = deserialize::<DeleteGraphArgs>(input_payload)?;
-    let lock = DELETE_GRAPH.read().unwrap().unwrap();
-    let result = lock(input.graph_name)?;
-    Ok(serialize(result)?)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]

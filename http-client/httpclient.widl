@@ -1,6 +1,6 @@
 namespace "wasmcloud:httpclient"
 
-interface {
+role Client {
   Request(method: string, url: string, headers: {string: string}, body: bytes): Response
 }
 

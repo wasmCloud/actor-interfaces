@@ -3,7 +3,6 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
@@ -14,60 +13,11 @@ use lazy_static::lazy_static;
 #[cfg(feature = "guest")]
 use std::sync::RwLock;
 
-/// Used for making calls from the actor to the host. There are no supported
-/// host calls for this capability provider
-#[cfg(feature = "guest")]
-pub struct Host {
-    binding: String,
-}
-
-#[cfg(feature = "guest")]
-impl Default for Host {
-    fn default() -> Self {
-        Host {
-            binding: "default".to_string(),
-        }
-    }
-}
-
-/// Requests a host abstraction for a given binding name
-#[cfg(feature = "guest")]
-pub fn host(binding: &str) -> Host {
-    Host {
-        binding: binding.to_string(),
-    }
-}
-
-/// Requests the default host abstraction
-#[cfg(feature = "guest")]
-pub fn default() -> Host {
-    Host::default()
-}
-
-#[cfg(feature = "guest")]
-impl Host {
-    pub fn handle_request(&self, request: Request) -> HandlerResult<Response> {
-        host_call(
-            &self.binding,
-            "wasmcloud:httpserver",
-            "HandleRequest",
-            &serialize(request)?,
-        )
-        .map(|vec| {
-            let resp = deserialize::<Response>(vec.as_ref()).unwrap();
-            resp
-        })
-        .map_err(|e| e.into())
-    }
-}
-
-/// Used to register message handlers in the actor
 #[cfg(feature = "guest")]
 pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// Registers a request handler for the [Request](struct.Request.html) type
     pub fn register_handle_request(f: fn(Request) -> HandlerResult<Response>) {
         *HANDLE_REQUEST.write().unwrap() = Some(f);
         register_function(&"HandleRequest", handle_request_wrapper);
@@ -88,7 +38,6 @@ fn handle_request_wrapper(input_payload: &[u8]) -> CallResult {
     Ok(serialize(result)?)
 }
 
-/// Represents an HTTP request received by the capability provider and delivered to the actor
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Request {
     #[serde(rename = "method")]
@@ -104,8 +53,6 @@ pub struct Request {
     pub body: Vec<u8>,
 }
 
-/// The actor responds with an instance of this struct to allow the HTTP server to deliver it
-/// to the consuming client
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Response {
     #[serde(rename = "statusCode")]

@@ -4,11 +4,14 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[cfg(feature = "guest")]
-use crate::OP_REQUEST;
-#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
+
+#[cfg(feature = "guest")]
+use lazy_static::lazy_static;
+#[cfg(feature = "guest")]
+use std::sync::RwLock;
 
 #[cfg(feature = "guest")]
 pub struct Host {
@@ -40,10 +43,6 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Make an HTTP request with specified method, headers and body to url.
-    /// This request must be carried out by an appropriately bound capability
-    /// provider implementing `wasmcloud:httpclient`, the request is not
-    /// made directly by the actor.
     pub fn request(
         &self,
         method: String,
@@ -60,7 +59,7 @@ impl Host {
         host_call(
             &self.binding,
             "wasmcloud:httpclient",
-            OP_REQUEST,
+            "Request",
             &serialize(input_args)?,
         )
         .map(|vec| {

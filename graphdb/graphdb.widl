@@ -1,6 +1,6 @@
 namespace "wasmcloud:graphdb"
 
-interface {
+role Store {
 	QueryGraph(graphName: string, query: string): QueryResponse
 	DeleteGraph(graphName: string): DeleteResponse
 }

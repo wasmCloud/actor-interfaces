@@ -1,11 +1,29 @@
 namespace "wasmcloud:telnet"
 
-interface {        
-    SessionStarted(session: string) : TelnetResult
-    ReceiveText(session: string, text: string) : TelnetResult
+role Server {        
+    """
+    Sends a string of text to a given session. The provider is not responsible for
+    indicating if this is a valid session or not. The telnet provider will not automatically
+    add newlines or carriage returns.
+    """
     SendText(session: string, text: string) : TelnetResult
 }
 
+role Client {
+    """
+    Indicates that a telnet client has connected with a given session ID
+    """
+    SessionStarted(session: string) : TelnetResult
+    """
+    Invoked when a given session sends a string of text through their telnet session
+    """
+    ReceiveText(session: string, text: string) : TelnetResult
+}
+
+"""
+Result type for telnet operations including a success value and optional
+error information
+"""
 type TelnetResult {
     success: bool
     error: string?

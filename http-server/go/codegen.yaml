@@ -1,7 +1,9 @@
 schema: ../http.widl
 generates:
   httpserver.go:
-    package: widl-codegen/language/tinygo
+    module: '@wapc/widl-codegen/tinygo'
     visitorClass: ModuleVisitor
     config:
       package: httpserver
+      handlerRoles:
+        - Actor

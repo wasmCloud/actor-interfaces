@@ -25,39 +25,13 @@ func (h *Host) WriteLog(target string, level string, text string) error {
 	if err != nil {
 		return err
 	}
-	_, err = wapc.HostCall(
+	_, err := wapc.HostCall(
 		h.binding,
 		"wasmcloud:logging",
 		"WriteLog",
 		inputBytes,
 	)
 	return err
-}
-
-type Handlers struct {
-	WriteLog func(target string, level string, text string) error
-}
-
-func (h Handlers) Register() {
-	if h.WriteLog != nil {
-		WriteLogHandler = h.WriteLog
-		wapc.RegisterFunction("WriteLog", WriteLogWrapper)
-	}
-}
-
-var (
-	WriteLogHandler func(target string, level string, text string) error
-)
-
-func WriteLogWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs WriteLogArgs
-	inputArgs.Decode(&decoder)
-	err := WriteLogHandler(inputArgs.Target, inputArgs.Level, inputArgs.Text)
-	if err != nil {
-		return nil, err
-	}
-	return []byte{}, nil
 }
 
 type WriteLogArgs struct {
