@@ -27,7 +27,7 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding
+/// Creates a named host binding for the telnet capability
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
@@ -35,7 +35,7 @@ pub fn host(binding: &str) -> Host {
     }
 }
 
-/// Creates the default host binding
+/// Creates the default host binding for the telnet capability
 #[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
@@ -67,10 +67,13 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
+    /// Register a function to receive session information when a user connects
+    /// to the linked telnet provider
     pub fn register_session_started(f: fn(String) -> HandlerResult<TelnetResult>) {
         *SESSION_STARTED.write().unwrap() = Some(f);
         register_function(&"SessionStarted", session_started_wrapper);
     }
+    /// Register a function to handle text received from the linked telnet provider
     pub fn register_receive_text(f: fn(String, String) -> HandlerResult<TelnetResult>) {
         *RECEIVE_TEXT.write().unwrap() = Some(f);
         register_function(&"ReceiveText", receive_text_wrapper);

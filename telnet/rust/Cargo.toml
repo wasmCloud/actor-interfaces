@@ -19,7 +19,16 @@ rmp-serde = "0.15.4"
 serde = { version = "1.0.125" , features = ["derive"] }
 lazy_static = "1.4.0"
 
+[dev-dependencies]
+wasmcloud-actor-core = { version = "0.2.2", features = ["guest"] }
+
 [profile.release]
 # Optimize for small code size
 opt-level = "s"
 lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]
+default-target = "wasm32-unknown-unknown"
