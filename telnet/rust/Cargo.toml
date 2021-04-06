@@ -31,4 +31,3 @@ lto = true
 [package.metadata.docs.rs]
 features = ["guest"]
 rustdoc-args = ["--cfg", "feature=\"guest\""]
-default-target = "wasm32-unknown-unknown"
