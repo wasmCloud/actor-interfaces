@@ -1,7 +1,12 @@
 namespace "wasmcloud:telnet"
 
 interface {        
-    SessionStarted(session: string) : bool
-    ReceiveText(session: string, text: string) : bool
-    SendText(session: string, text: string) : bool
+    SessionStarted(session: string) : TelnetResult
+    ReceiveText(session: string, text: string) : TelnetResult
+    SendText(session: string, text: string) : TelnetResult
+}
+
+type TelnetResult {
+    success: bool
+    error: string?
 }
