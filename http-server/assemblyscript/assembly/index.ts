@@ -2,6 +2,7 @@ import { Decoder, Writer, Encoder, Sizer, Codec } from "@wapc/as-msgpack";
 
 import { register } from "@wapc/as-guest";
 export class Handlers {
+  // Register a function to handle an incoming HTTP request from a linked provider
   static registerHandleRequest(handler: (request: Request) => Response): void {
     HandleRequestHandler = handler;
     register("HandleRequest", HandleRequestWrapper);
@@ -17,6 +18,7 @@ function HandleRequestWrapper(payload: ArrayBuffer): ArrayBuffer {
   return response.toBuffer();
 }
 
+// HTTP Request object
 export class Request implements Codec {
   method: string = "";
   path: string = "";
@@ -135,6 +137,7 @@ export class RequestBuilder {
   }
 }
 
+// HTTP Response object
 export class Response implements Codec {
   statusCode: u32 = 0;
   status: string = "";

@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,6 +38,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Gets a value for a specified key. If the key doesn't exist, this function will
+    /// not panic, instead the response type will indicate that it does not exist.
     pub fn get(&self, key: String) -> HandlerResult<GetResponse> {
         let input_args = GetArgs { key };
         host_call(
@@ -57,7 +54,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Add a given numeric value to a key
     pub fn add(&self, key: String, value: i32) -> HandlerResult<AddResponse> {
         let input_args = AddArgs { key, value };
         host_call(
@@ -72,7 +69,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Sets the string value of a key
     pub fn set(&self, key: String, value: String, expires: i32) -> HandlerResult<SetResponse> {
         let input_args = SetArgs {
             key,
@@ -91,7 +88,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Delete a key
     pub fn del(&self, key: String) -> HandlerResult<DelResponse> {
         let input_args = DelArgs { key };
         host_call(
@@ -106,7 +103,8 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Clear a list of its values. Depending on the provider implementation, this may
+    /// delete the list entirely
     pub fn clear(&self, key: String) -> HandlerResult<DelResponse> {
         let input_args = ClearArgs { key };
         host_call(
@@ -121,7 +119,8 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Retrieve a range of values from a list. Depending on the provider
+    /// implementation, start  and stop may or may not be inclusive.
     pub fn range(&self, key: String, start: i32, stop: i32) -> HandlerResult<ListRangeResponse> {
         let input_args = RangeArgs { key, start, stop };
         host_call(
@@ -136,7 +135,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Push a value onto a list
     pub fn push(&self, key: String, value: String) -> HandlerResult<ListResponse> {
         let input_args = PushArgs { key, value };
         host_call(
@@ -151,7 +150,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Delete an item from a list
     pub fn list_item_delete(&self, key: String, value: String) -> HandlerResult<ListResponse> {
         let input_args = ListItemDeleteArgs { key, value };
         host_call(
@@ -166,7 +165,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Add an item into a set
     pub fn set_add(&self, key: String, value: String) -> HandlerResult<SetOperationResponse> {
         let input_args = SetAddArgs { key, value };
         host_call(
@@ -181,7 +180,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Remove an item from a set
     pub fn set_remove(&self, key: String, value: String) -> HandlerResult<SetOperationResponse> {
         let input_args = SetRemoveArgs { key, value };
         host_call(
@@ -196,7 +195,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Perform and return a set union on a given list of keys
     pub fn set_union(&self, keys: Vec<String>) -> HandlerResult<SetQueryResponse> {
         let input_args = SetUnionArgs { keys };
         host_call(
@@ -211,7 +210,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Perform and return a set intersect on a given list of keys
     pub fn set_intersection(&self, keys: Vec<String>) -> HandlerResult<SetQueryResponse> {
         let input_args = SetIntersectionArgs { keys };
         host_call(
@@ -226,7 +225,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Retrieve a list of items stored in a set
     pub fn set_query(&self, key: String) -> HandlerResult<SetQueryResponse> {
         let input_args = SetQueryArgs { key };
         host_call(
@@ -241,7 +240,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Returns a value stored at a key if it exists
     pub fn key_exists(&self, key: String) -> HandlerResult<GetResponse> {
         let input_args = KeyExistsArgs { key };
         host_call(
@@ -360,6 +359,7 @@ pub struct KeyExistsArgs {
     pub key: String,
 }
 
+/// Response type for Get operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct GetResponse {
     #[serde(rename = "value")]
@@ -368,42 +368,50 @@ pub struct GetResponse {
     pub exists: bool,
 }
 
+/// Response type for Add operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct AddResponse {
     #[serde(rename = "value")]
     pub value: i32,
 }
 
+/// Response type for Delete operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct DelResponse {
     #[serde(rename = "key")]
     pub key: String,
 }
 
+/// Response type for list range operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListRangeResponse {
     #[serde(rename = "values")]
     pub values: Vec<String>,
 }
 
+/// Response type for list push operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListResponse {
     #[serde(rename = "newCount")]
     pub new_count: i32,
 }
 
+/// Response type for the Set operation, not to be confused with the set data
+/// structure
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetResponse {
     #[serde(rename = "value")]
     pub value: String,
 }
 
+/// Response type for set add operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetOperationResponse {
     #[serde(rename = "new_count")]
     pub new_count: i32,
 }
 
+/// Response type for set query operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetQueryResponse {
     #[serde(rename = "values")]

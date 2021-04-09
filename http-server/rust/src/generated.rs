@@ -9,15 +9,11 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
+    /// Register a function to handle an incoming HTTP request from a linked provider
     pub fn register_handle_request(f: fn(Request) -> HandlerResult<Response>) {
         *HANDLE_REQUEST.write().unwrap() = Some(f);
         register_function(&"HandleRequest", handle_request_wrapper);
@@ -25,9 +21,8 @@ impl Handlers {
 }
 
 #[cfg(feature = "guest")]
-lazy_static! {
-    static ref HANDLE_REQUEST: RwLock<Option<fn(Request) -> HandlerResult<Response>>> =
-        RwLock::new(None);
+lazy_static::lazy_static! {
+static ref HANDLE_REQUEST: std::sync::RwLock<Option<fn(Request) -> HandlerResult<Response>>> = std::sync::RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
@@ -38,6 +33,7 @@ fn handle_request_wrapper(input_payload: &[u8]) -> CallResult {
     Ok(serialize(result)?)
 }
 
+/// HTTP Request object
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Request {
     #[serde(rename = "method")]
@@ -53,6 +49,7 @@ pub struct Request {
     pub body: Vec<u8>,
 }
 
+/// HTTP Response object
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Response {
     #[serde(rename = "statusCode")]

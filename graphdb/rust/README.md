@@ -15,13 +15,13 @@ extern crate wapc_guest as guest;
 use wasmcloud_actor_graphdb as graph;
 use graph::*;
 use wasmcloud_actor_http_server as http;
+use wasmcloud_actor_core as actorcore;
 
 use guest::prelude::*;
 
-#[no_mangle]
-pub fn wapc_init() {
+#[actorcore::init]
+pub fn init() {
     http::Handlers::register_handle_request(handle_http_request);
-    wasmcloud_actor_core::Handlers::register_health_request(health);
 }
 
 fn handle_http_request(_: http::Request) -> HandlerResult<http::Response> {
@@ -43,8 +43,5 @@ fn handle_http_request(_: http::Request) -> HandlerResult<http::Response> {
     Ok(http::Response::json(result, 200, "OK"))
 }
 
-fn health(_: wasmcloud_actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
-  Ok(actor_core::HealthCheckResponse::healthy())   
-}
 ```
 

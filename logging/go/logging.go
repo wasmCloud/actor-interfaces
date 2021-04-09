@@ -15,6 +15,11 @@ func NewHost(binding string) *Host {
 	}
 }
 
+// Writes a log message to specified target and level. `target` is used to filter
+// logs to a specific target, e.g.  for logging to your specific actor name, and
+// can be left as an empty string. `level` can be one of the following log levels:
+// `error`, `warn`, `info`, `debug`, `trace`. It is up to the provider to ensure
+// the `level` value is valid.
 func (h *Host) WriteLog(target string, level string, text string) error {
 	inputArgs := WriteLogArgs{
 		Target: target,

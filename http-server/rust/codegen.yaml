@@ -1,4 +1,4 @@
-schema: ../http.widl
+schema: ../httpserver.widl
 generates:
   src/generated.rs:
     module: '@wapc/widl-codegen/rust'

@@ -1,9 +1,15 @@
 namespace "wasmcloud:httpserver"
 
 role Actor {
+  """
+  Register a function to handle an incoming HTTP request from a linked provider
+  """
   HandleRequest{request: Request}: Response
 }
 
+"""
+HTTP Request object
+"""
 type Request {
   method: string
   path: string
@@ -12,6 +18,9 @@ type Request {
   body: bytes
 }
 
+"""
+HTTP Response object
+"""
 type Response {
   statusCode: u32
   status: string

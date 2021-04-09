@@ -15,6 +15,7 @@ func NewHost(binding string) *Host {
 	}
 }
 
+// Create a container in a blobstore. Returns the container created if successful
 func (h *Host) CreateContainer(container Container) (Container, error) {
 	inputArgs := CreateContainerArgs{
 		Container: container,
@@ -36,6 +37,7 @@ func (h *Host) CreateContainer(container Container) (Container, error) {
 	return DecodeContainer(&decoder)
 }
 
+// Remove a container from a blobstore
 func (h *Host) RemoveContainer(container Container) error {
 	inputArgs := RemoveContainerArgs{
 		Container: container,
@@ -53,6 +55,7 @@ func (h *Host) RemoveContainer(container Container) error {
 	return err
 }
 
+// Remove an object from a blobstore
 func (h *Host) RemoveObject(blob Blob) error {
 	inputArgs := RemoveObjectArgs{
 		Blob: blob,
@@ -70,6 +73,7 @@ func (h *Host) RemoveObject(blob Blob) error {
 	return err
 }
 
+// Returns a list of blobs that are present in the specified container
 func (h *Host) ListObjects(container Container) (BlobList, error) {
 	inputArgs := ListObjectsArgs{
 		Container: container,
@@ -91,6 +95,9 @@ func (h *Host) ListObjects(container Container) (BlobList, error) {
 	return DecodeBlobList(&decoder)
 }
 
+// Upload a file chunk to a blobstore, which may only be part of a full file. This
+// must be called AFTER the StartUpload operation. Chunks should be small, as
+// memory over a few megabytes may exceed the wasm memory allocation.
 func (h *Host) UploadChunk(chunk FileChunk) error {
 	inputArgs := UploadChunkArgs{
 		Chunk: chunk,
@@ -108,6 +115,8 @@ func (h *Host) UploadChunk(chunk FileChunk) error {
 	return err
 }
 
+// Issue a request to start a download from a blobstore. Chunks will be sent to the
+// function that's registered with the ReceiveChunk operation.
 func (h *Host) StartDownload(request StreamRequest) error {
 	inputArgs := StartDownloadArgs{
 		Request: request,
@@ -125,9 +134,11 @@ func (h *Host) StartDownload(request StreamRequest) error {
 	return err
 }
 
-func (h *Host) StartUpload(blob FileChunk) error {
+// Begin the upload process with the first chunk of a full file. Subsequent chunks
+// should be uploaded with the UploadChunk operation.
+func (h *Host) StartUpload(chunk FileChunk) error {
 	inputArgs := StartUploadArgs{
-		Blob: blob,
+		Chunk: chunk,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
@@ -142,6 +153,7 @@ func (h *Host) StartUpload(blob FileChunk) error {
 	return err
 }
 
+// Retreives information about a blob
 func (h *Host) GetObjectInfo(blob Blob) (Blob, error) {
 	inputArgs := GetObjectInfoArgs{
 		Blob: blob,
@@ -164,6 +176,8 @@ func (h *Host) GetObjectInfo(blob Blob) (Blob, error) {
 }
 
 type Handlers struct {
+	// Defines a handler for incoming chunks forwarded by a wasmcloud:blobstore
+	// provider. Chunks may not be received in order.
 	ReceiveChunk func(chunk FileChunk) error
 }
 
@@ -526,7 +540,7 @@ func (o *StartDownloadArgs) Encode(encoder msgpack.Writer) error {
 }
 
 type StartUploadArgs struct {
-	Blob FileChunk
+	Chunk FileChunk
 }
 
 func DecodeStartUploadArgsNullable(decoder *msgpack.Decoder) (*StartUploadArgs, error) {
@@ -556,8 +570,8 @@ func (o *StartUploadArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "blob":
-			o.Blob, err = DecodeFileChunk(decoder)
+		case "chunk":
+			o.Chunk, err = DecodeFileChunk(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -575,8 +589,8 @@ func (o *StartUploadArgs) Encode(encoder msgpack.Writer) error {
 		return nil
 	}
 	encoder.WriteMapSize(1)
-	encoder.WriteString("blob")
-	o.Blob.Encode(encoder)
+	encoder.WriteString("chunk")
+	o.Chunk.Encode(encoder)
 
 	return nil
 }
@@ -693,6 +707,9 @@ func (o *ReceiveChunkArgs) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// Represents a single chunk that may comprise part of a file or an entire file.
+// The fields for sequence number, total bytes and chunk bytes should be used to
+// determine the chunk order, as well as the optional context field.
 type FileChunk struct {
 	SequenceNo uint64
 	Container  Container
@@ -792,6 +809,7 @@ func (o *FileChunk) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A container organizes a set of blobs, similar to a directory in a file system.
 type Container struct {
 	ID string
 }
@@ -848,6 +866,7 @@ func (o *Container) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A wrapper object around a list of containers.
 type ContainerList struct {
 	Containers []Container
 }
@@ -920,6 +939,8 @@ func (o *ContainerList) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A blob is a representation of an object in a blobstore, similar to a file in a
+// file system.
 type Blob struct {
 	ID        string
 	Container Container
@@ -986,6 +1007,7 @@ func (o *Blob) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A wrapper object around a list of blobs.
 type BlobList struct {
 	Blobs []Blob
 }
@@ -1058,6 +1080,7 @@ func (o *BlobList) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// Used to request a download from a blobstore
 type StreamRequest struct {
 	ID        string
 	Container Container

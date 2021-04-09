@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-graphdb"
-version = "0.1.2"
+version = "0.1.3"
 description = "GraphDB Actor Interface for wasmCloud Actors"
 authors = ["wasmCloud Team"]
 edition = "2018"
@@ -30,10 +30,15 @@ lazy_static = "1.4.0"
 structopt = "0.3.17"
 serde_json = "1.0.57"
 base64 = "0.12.3"
-wasmcloud-actor-core = { version = "0.2.0", features = ["guest"]}
-wasmcloud-actor-http-server = { version = "0.1.0", features = ["guest"]}
+wasmcloud-actor-core = { version = "0.2.2", features = ["guest"]}
+wasmcloud-actor-http-server = { version = "0.1.1", features = ["guest"]}
 
 [profile.release]
 # Optimize for small code size
 opt-level = "s"
 lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

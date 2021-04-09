@@ -28,7 +28,7 @@
 
 mod generated;
 pub use generated::{
-    deserialize, serialize, CapabilityConfiguration, HealthCheckRequest, HealthCheckResponse,
+    deserialize, serialize, CapabilityConfiguration, HealthCheckRequest, HealthCheckResponse, Handlers,
 };
 
 #[cfg(feature = "guest")]

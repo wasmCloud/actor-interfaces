@@ -4,8 +4,9 @@ all: deps codegen build
 
 deps:
 
-codegen:
-	wapc generate codegen.yaml
+# Manual modifications have been make to generated.rs, so this step is commented out
+# codegen:
+# 	wapc generate codegen.yaml
 
 build:
 	cargo build 

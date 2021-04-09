@@ -1,4 +1,4 @@
-schema: ../http.widl
+schema: ../httpserver.widl
 generates:
   httpserver.go:
     module: '@wapc/widl-codegen/tinygo'

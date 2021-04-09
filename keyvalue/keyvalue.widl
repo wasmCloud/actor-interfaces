@@ -1,51 +1,121 @@
 namespace "wasmcloud:keyvalue"
 
 role Store {
+    """
+    Gets a value for a specified key. If the key doesn't exist, this function will not panic, instead
+    the response type will indicate that it does not exist.
+    """
     Get(key: string): GetResponse
+    """
+    Add a given numeric value to a key
+    """
     Add(key: string, value: i32): AddResponse
+    """
+    Sets the string value of a key
+    """
     Set(key: string, value: string, expires: i32): SetResponse 
+    """
+    Delete a key
+    """
     Del(key: string): DelResponse
+    """
+    Clear a list of its values. Depending on the provider implementation, this may delete
+    the list entirely
+    """
     Clear(key: string): DelResponse
+    """
+    Retrieve a range of values from a list. Depending on the provider implementation, start 
+    and stop may or may not be inclusive.
+    """
     Range(key: string, start: i32, stop: i32): ListRangeResponse
+    """
+    Push a value onto a list
+    """
     Push(key: string, value: string): ListResponse
+    """
+    Delete an item from a list
+    """
     ListItemDelete(key: string, value: string): ListResponse
+    """
+    Add an item into a set
+    """
     SetAdd(key: string, value: string): SetOperationResponse
+    """
+    Remove an item from a set
+    """
     SetRemove(key: string, value: string): SetOperationResponse
+    """
+    Perform and return a set union on a given list of keys
+    """
     SetUnion(keys: [string]): SetQueryResponse
+    """
+    Perform and return a set intersect on a given list of keys
+    """
     SetIntersection(keys: [string]): SetQueryResponse
+    """
+    Retrieve a list of items stored in a set
+    """
     SetQuery(key: string): SetQueryResponse
+    """
+    Returns a value stored at a key if it exists
+    """
     KeyExists(key: string): GetResponse
 }
 
+"""
+Response type for Get operations
+"""
 type GetResponse {
     value: string
     exists: bool
 }
 
+"""
+Response type for Add operations
+"""
 type AddResponse {
     value: i32
 }
 
+"""
+Response type for Delete operations
+"""
 type DelResponse {
     key: string
 }
 
+"""
+Response type for list range operations
+"""
 type ListRangeResponse {
     values: [string]
 }
 
+"""
+Response type for list push operations
+"""
 type ListResponse {
     newCount: i32
 }
 
+"""
+Response type for the Set operation, not to be confused with the
+set data structure
+"""
 type SetResponse {
     value: string
 }
 
+"""
+Response type for set add operations
+"""
 type SetOperationResponse {
     new_count: i32
 }
 
+"""
+Response type for set query operations
+"""
 type SetQueryResponse {
     values: [string]
 }

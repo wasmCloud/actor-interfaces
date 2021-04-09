@@ -4,15 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-    - "actor-core/**"
+    - "actor-core/rust/**"
   pull_request:
     branches: [ main ]
     paths:
-    - "actor-core/**"
+    - "actor-core/rust/**"
 
 env:
   CARGO_TERM_COLOR: always
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   working-directory: ./actor-core/rust/wasmcloud-actor-core
 
 jobs:

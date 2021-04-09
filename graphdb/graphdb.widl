@@ -1,29 +1,52 @@
 namespace "wasmcloud:graphdb"
 
 role Store {
+	"""
+	Execute a query on a given graph
+	"""
 	QueryGraph(graphName: string, query: string): QueryResponse
+	"""
+	Delete a graph from the database
+	"""
 	DeleteGraph(graphName: string): DeleteResponse
 }
 
+"""
+Result from a graph query
+"""
 type QueryResponse {
 	resultSet: ResultSet
 }
 
+"""
+Indicates the success of a delete operation
+"""
 type DeleteResponse {
 	success: bool
 }
 
+"""
+Result from a graph query, contains a list of columns which were
+returned from the query and statistics about query time
+"""
 type ResultSet {
 	columns: [Column]
 	statistics: [string]
 }
 
+"""
+A single entity in a graph database, which may be a scalar, node, or relation
+"""
 type Column {
 	scalars: [Scalar]?
 	nodes: [Node]?
 	relations: [Relation]?
 }
 
+"""
+Represents a scalar value, all fields should be examined to determine
+the value contained in the scalar
+"""
 type Scalar {
 	boolValue: bool?
 	intValue: i64?
@@ -31,11 +54,18 @@ type Scalar {
 	stringValue: string?
 }
 
+"""
+A node in a graph database, comprised of a list of labels and
+a map of properties
+"""
 type Node {
 	labels: [string]
 	properties: {string:Scalar}
 }
 
+"""
+A relationship between exactly two nodes
+"""
 type Relation {
 	typeName: string
 	properties: {string:Scalar}	

@@ -8,6 +8,8 @@ export class Host {
     this.binding = binding;
   }
 
+  // Gets a value for a specified key. If the key doesn't exist, this function will
+  // not panic, instead the response type will indicate that it does not exist.
   get(key: string): GetResponse {
     const inputArgs = new GetArgs();
     inputArgs.key = key;
@@ -21,6 +23,7 @@ export class Host {
     return GetResponse.decode(decoder);
   }
 
+  // Add a given numeric value to a key
   add(key: string, value: i32): AddResponse {
     const inputArgs = new AddArgs();
     inputArgs.key = key;
@@ -35,6 +38,7 @@ export class Host {
     return AddResponse.decode(decoder);
   }
 
+  // Sets the string value of a key
   set(key: string, value: string, expires: i32): SetResponse {
     const inputArgs = new SetArgs();
     inputArgs.key = key;
@@ -50,6 +54,7 @@ export class Host {
     return SetResponse.decode(decoder);
   }
 
+  // Delete a key
   del(key: string): DelResponse {
     const inputArgs = new DelArgs();
     inputArgs.key = key;
@@ -63,6 +68,8 @@ export class Host {
     return DelResponse.decode(decoder);
   }
 
+  // Clear a list of its values. Depending on the provider implementation, this may
+  // delete the list entirely
   clear(key: string): DelResponse {
     const inputArgs = new ClearArgs();
     inputArgs.key = key;
@@ -76,6 +83,8 @@ export class Host {
     return DelResponse.decode(decoder);
   }
 
+  // Retrieve a range of values from a list. Depending on the provider
+  // implementation, start  and stop may or may not be inclusive.
   range(key: string, start: i32, stop: i32): ListRangeResponse {
     const inputArgs = new RangeArgs();
     inputArgs.key = key;
@@ -91,6 +100,7 @@ export class Host {
     return ListRangeResponse.decode(decoder);
   }
 
+  // Push a value onto a list
   push(key: string, value: string): ListResponse {
     const inputArgs = new PushArgs();
     inputArgs.key = key;
@@ -105,6 +115,7 @@ export class Host {
     return ListResponse.decode(decoder);
   }
 
+  // Delete an item from a list
   listItemDelete(key: string, value: string): ListResponse {
     const inputArgs = new ListItemDeleteArgs();
     inputArgs.key = key;
@@ -119,6 +130,7 @@ export class Host {
     return ListResponse.decode(decoder);
   }
 
+  // Add an item into a set
   setAdd(key: string, value: string): SetOperationResponse {
     const inputArgs = new SetAddArgs();
     inputArgs.key = key;
@@ -133,6 +145,7 @@ export class Host {
     return SetOperationResponse.decode(decoder);
   }
 
+  // Remove an item from a set
   setRemove(key: string, value: string): SetOperationResponse {
     const inputArgs = new SetRemoveArgs();
     inputArgs.key = key;
@@ -147,6 +160,7 @@ export class Host {
     return SetOperationResponse.decode(decoder);
   }
 
+  // Perform and return a set union on a given list of keys
   setUnion(keys: Array<string>): SetQueryResponse {
     const inputArgs = new SetUnionArgs();
     inputArgs.keys = keys;
@@ -160,6 +174,7 @@ export class Host {
     return SetQueryResponse.decode(decoder);
   }
 
+  // Perform and return a set intersect on a given list of keys
   setIntersection(keys: Array<string>): SetQueryResponse {
     const inputArgs = new SetIntersectionArgs();
     inputArgs.keys = keys;
@@ -173,6 +188,7 @@ export class Host {
     return SetQueryResponse.decode(decoder);
   }
 
+  // Retrieve a list of items stored in a set
   setQuery(key: string): SetQueryResponse {
     const inputArgs = new SetQueryArgs();
     inputArgs.key = key;
@@ -186,6 +202,7 @@ export class Host {
     return SetQueryResponse.decode(decoder);
   }
 
+  // Returns a value stored at a key if it exists
   keyExists(key: string): GetResponse {
     const inputArgs = new KeyExistsArgs();
     inputArgs.key = key;
@@ -897,6 +914,7 @@ export class KeyExistsArgs implements Codec {
   }
 }
 
+// Response type for Get operations
 export class GetResponse implements Codec {
   value: string = "";
   exists: bool = false;
@@ -970,6 +988,7 @@ export class GetResponseBuilder {
   }
 }
 
+// Response type for Add operations
 export class AddResponse implements Codec {
   value: i32 = 0;
 
@@ -1033,6 +1052,7 @@ export class AddResponseBuilder {
   }
 }
 
+// Response type for Delete operations
 export class DelResponse implements Codec {
   key: string = "";
 
@@ -1096,6 +1116,7 @@ export class DelResponseBuilder {
   }
 }
 
+// Response type for list range operations
 export class ListRangeResponse implements Codec {
   values: Array<string> = new Array<string>();
 
@@ -1163,6 +1184,7 @@ export class ListRangeResponseBuilder {
   }
 }
 
+// Response type for list push operations
 export class ListResponse implements Codec {
   newCount: i32 = 0;
 
@@ -1226,6 +1248,8 @@ export class ListResponseBuilder {
   }
 }
 
+// Response type for the Set operation, not to be confused with the set data
+// structure
 export class SetResponse implements Codec {
   value: string = "";
 
@@ -1289,6 +1313,7 @@ export class SetResponseBuilder {
   }
 }
 
+// Response type for set add operations
 export class SetOperationResponse implements Codec {
   new_count: i32 = 0;
 
@@ -1352,6 +1377,7 @@ export class SetOperationResponseBuilder {
   }
 }
 
+// Response type for set query operations
 export class SetQueryResponse implements Codec {
   values: Array<string> = new Array<string>();
 

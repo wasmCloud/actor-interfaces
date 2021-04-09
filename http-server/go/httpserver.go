@@ -6,6 +6,7 @@ import (
 )
 
 type Handlers struct {
+	// Register a function to handle an incoming HTTP request from a linked provider
 	HandleRequest func(request Request) (Response, error)
 }
 
@@ -31,6 +32,7 @@ func handleRequestWrapper(payload []byte) ([]byte, error) {
 	return msgpack.ToBytes(&response)
 }
 
+// HTTP Request object
 type Request struct {
 	Method      string
 	Path        string
@@ -129,6 +131,7 @@ func (o *Request) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// HTTP Response object
 type Response struct {
 	StatusCode uint32
 	Status     string

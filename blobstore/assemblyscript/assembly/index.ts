@@ -8,6 +8,7 @@ export class Host {
     this.binding = binding;
   }
 
+  // Create a container in a blobstore. Returns the container created if successful
   createContainer(container: Container): Container {
     const inputArgs = new CreateContainerArgs();
     inputArgs.container = container;
@@ -21,6 +22,7 @@ export class Host {
     return Container.decode(decoder);
   }
 
+  // Remove a container from a blobstore
   removeContainer(container: Container): void {
     const inputArgs = new RemoveContainerArgs();
     inputArgs.container = container;
@@ -32,6 +34,7 @@ export class Host {
     );
   }
 
+  // Remove an object from a blobstore
   removeObject(blob: Blob): void {
     const inputArgs = new RemoveObjectArgs();
     inputArgs.blob = blob;
@@ -43,6 +46,7 @@ export class Host {
     );
   }
 
+  // Returns a list of blobs that are present in the specified container
   listObjects(container: Container): BlobList {
     const inputArgs = new ListObjectsArgs();
     inputArgs.container = container;
@@ -56,6 +60,9 @@ export class Host {
     return BlobList.decode(decoder);
   }
 
+  // Upload a file chunk to a blobstore, which may only be part of a full file. This
+  // must be called AFTER the StartUpload operation. Chunks should be small, as
+  // memory over a few megabytes may exceed the wasm memory allocation.
   uploadChunk(chunk: FileChunk): void {
     const inputArgs = new UploadChunkArgs();
     inputArgs.chunk = chunk;
@@ -67,6 +74,8 @@ export class Host {
     );
   }
 
+  // Issue a request to start a download from a blobstore. Chunks will be sent to the
+  // function that's registered with the ReceiveChunk operation.
   startDownload(request: StreamRequest): void {
     const inputArgs = new StartDownloadArgs();
     inputArgs.request = request;
@@ -78,9 +87,11 @@ export class Host {
     );
   }
 
-  startUpload(blob: FileChunk): void {
+  // Begin the upload process with the first chunk of a full file. Subsequent chunks
+  // should be uploaded with the UploadChunk operation.
+  startUpload(chunk: FileChunk): void {
     const inputArgs = new StartUploadArgs();
-    inputArgs.blob = blob;
+    inputArgs.chunk = chunk;
     hostCall(
       this.binding,
       "wasmcloud:blobstore",
@@ -89,6 +100,7 @@ export class Host {
     );
   }
 
+  // Retreives information about a blob
   getObjectInfo(blob: Blob): Blob {
     const inputArgs = new GetObjectInfoArgs();
     inputArgs.blob = blob;
@@ -105,6 +117,8 @@ export class Host {
 
 import { register } from "@wapc/as-guest";
 export class Handlers {
+  // Defines a handler for incoming chunks forwarded by a wasmcloud:blobstore
+  // provider. Chunks may not be received in order.
   static registerReceiveChunk(handler: (chunk: FileChunk) => void): void {
     ReceiveChunkHandler = handler;
     register("ReceiveChunk", ReceiveChunkWrapper);
@@ -397,7 +411,7 @@ export class StartDownloadArgs implements Codec {
 }
 
 export class StartUploadArgs implements Codec {
-  blob: FileChunk = new FileChunk();
+  chunk: FileChunk = new FileChunk();
 
   static decodeNullable(decoder: Decoder): StartUploadArgs | null {
     if (decoder.isNextNil()) return null;
@@ -418,8 +432,8 @@ export class StartUploadArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "blob") {
-        this.blob = FileChunk.decode(decoder);
+      if (field == "chunk") {
+        this.chunk = FileChunk.decode(decoder);
       } else {
         decoder.skip();
       }
@@ -428,8 +442,8 @@ export class StartUploadArgs implements Codec {
 
   encode(encoder: Writer): void {
     encoder.writeMapSize(1);
-    encoder.writeString("blob");
-    this.blob.encode(encoder);
+    encoder.writeString("chunk");
+    this.chunk.encode(encoder);
   }
 
   toBuffer(): ArrayBuffer {
@@ -534,6 +548,9 @@ export class ReceiveChunkArgs implements Codec {
   }
 }
 
+// Represents a single chunk that may comprise part of a file or an entire file.
+// The fields for sequence number, total bytes and chunk bytes should be used to
+// determine the chunk order, as well as the optional context field.
 export class FileChunk implements Codec {
   sequenceNo: u64 = 0;
   container: Container = new Container();
@@ -665,6 +682,7 @@ export class FileChunkBuilder {
   }
 }
 
+// A container organizes a set of blobs, similar to a directory in a file system.
 export class Container implements Codec {
   id: string = "";
 
@@ -728,6 +746,7 @@ export class ContainerBuilder {
   }
 }
 
+// A wrapper object around a list of containers.
 export class ContainerList implements Codec {
   containers: Array<Container> = new Array<Container>();
 
@@ -800,6 +819,8 @@ export class ContainerListBuilder {
   }
 }
 
+// A blob is a representation of an object in a blobstore, similar to a file in a
+// file system.
 export class Blob implements Codec {
   id: string = "";
   container: Container = new Container();
@@ -883,6 +904,7 @@ export class BlobBuilder {
   }
 }
 
+// A wrapper object around a list of blobs.
 export class BlobList implements Codec {
   blobs: Array<Blob> = new Array<Blob>();
 
@@ -952,6 +974,7 @@ export class BlobListBuilder {
   }
 }
 
+// Used to request a download from a blobstore
 export class StreamRequest implements Codec {
   id: string = "";
   container: Container = new Container();

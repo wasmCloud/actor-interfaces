@@ -43,6 +43,7 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Write an event to the given stream ID
     pub fn write_event(
         &self,
         stream_id: String,
@@ -61,7 +62,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Query a stream for the list of events
     pub fn query_stream(&self, query: StreamQuery) -> HandlerResult<EventList> {
         host_call(
             &self.binding,
@@ -82,7 +83,8 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    pub fn register_deliver_event(f: fn(Event) -> HandlerResult<bool>) {
+    /// Handle an incoming event
+    pub fn register_deliver_event(f: fn(Event) -> HandlerResult<EventAck>) {
         *DELIVER_EVENT.write().unwrap() = Some(f);
         register_function(&"DeliverEvent", deliver_event_wrapper);
     }
@@ -90,7 +92,8 @@ impl Handlers {
 
 #[cfg(feature = "guest")]
 lazy_static! {
-    static ref DELIVER_EVENT: RwLock<Option<fn(Event) -> HandlerResult<bool>>> = RwLock::new(None);
+    static ref DELIVER_EVENT: RwLock<Option<fn(Event) -> HandlerResult<EventAck>>> =
+        RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
@@ -109,6 +112,7 @@ pub struct WriteEventArgs {
     pub values: std::collections::HashMap<String, String>,
 }
 
+/// A single event that occurred on a given stream
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Event {
     #[serde(rename = "eventId")]
@@ -119,6 +123,7 @@ pub struct Event {
     pub values: std::collections::HashMap<String, String>,
 }
 
+/// Result object used for error handling and acknowledgement of events
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct EventAck {
     #[serde(rename = "eventId")]
@@ -127,12 +132,15 @@ pub struct EventAck {
     pub error: Option<String>,
 }
 
+/// Wrapper object around a list of events
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct EventList {
     #[serde(rename = "events")]
     pub events: Vec<Event>,
 }
 
+/// Used to query a stream for events with a maximum event count and optional time
+/// frame
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StreamQuery {
     #[serde(rename = "streamId")]
@@ -143,6 +151,7 @@ pub struct StreamQuery {
     pub count: u64,
 }
 
+/// Defines a range of time with a minimum and maximum timestamp (epoch time)
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct TimeRange {
     #[serde(rename = "minTime")]

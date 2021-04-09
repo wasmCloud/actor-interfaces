@@ -15,19 +15,20 @@ The following is an example usage:
 ```rust
 #[macro_use]
 extern crate serde_json;
-extern crate actor_http_server as http;
-extern crate actor_keyvalue as kv;
+extern crate wasmcloud_actor_http_server as http;
+extern crate wasmcloud_actor_keyvalue as kv;
+extern crate wasmcloud_actor_core as actorcore;
 
 use http::{self, Request, Response};
 use wascap_guest::HandlerResult;
 
-#[no_mangle]
-pub fn wapc_init() {
-    http::Handlers::register_handle_request(increment_counter);
-}
-
 #[macro_use]
 extern crate serde_json;
+
+#[actorcore::init]
+pub fn init() {
+    http::Handlers::register_handle_request(increment_counter);
+}
 
 fn increment_counter(msg: Request) -> HandlerResult<Response> {
     let key = msg.path.replace('/', ":");

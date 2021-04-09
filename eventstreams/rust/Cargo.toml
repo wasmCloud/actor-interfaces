@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-eventstreams"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the event streams contract for use by wasmCloud Actors"
@@ -24,3 +24,9 @@ rmp-serde = "0.15.4"
 [dev-dependencies]
 wasmcloud-actor-http-server = {version = "0.1.1", features = ["guest"] }
 wasmcloud-actor-core = { version = "0.2.2", features = ["guest"] }
+wasmcloud-actor-eventstreams = { version = "0.2.0", features = ["guest"] }
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

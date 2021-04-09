@@ -43,6 +43,7 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Create a container in a blobstore. Returns the container created if successful
     pub fn create_container(&self, container: Container) -> HandlerResult<Container> {
         let input_args = CreateContainerArgs { container };
         host_call(
@@ -57,7 +58,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Remove a container from a blobstore
     pub fn remove_container(&self, container: Container) -> HandlerResult<()> {
         let input_args = RemoveContainerArgs { container };
         host_call(
@@ -69,7 +70,7 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-
+    /// Remove an object from a blobstore
     pub fn remove_object(&self, blob: Blob) -> HandlerResult<()> {
         let input_args = RemoveObjectArgs { blob };
         host_call(
@@ -81,7 +82,7 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-
+    /// Returns a list of blobs that are present in the specified container
     pub fn list_objects(&self, container: Container) -> HandlerResult<BlobList> {
         let input_args = ListObjectsArgs { container };
         host_call(
@@ -96,7 +97,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Upload a file chunk to a blobstore, which may only be part of a full file. This
+    /// must be called AFTER the StartUpload operation. Chunks should be small, as
+    /// memory over a few megabytes may exceed the wasm memory allocation.
     pub fn upload_chunk(&self, chunk: FileChunk) -> HandlerResult<()> {
         let input_args = UploadChunkArgs { chunk };
         host_call(
@@ -108,7 +111,8 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-
+    /// Issue a request to start a download from a blobstore. Chunks will be sent to the
+    /// function that's registered with the ReceiveChunk operation.
     pub fn start_download(&self, request: StreamRequest) -> HandlerResult<()> {
         let input_args = StartDownloadArgs { request };
         host_call(
@@ -120,9 +124,10 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-
-    pub fn start_upload(&self, blob: FileChunk) -> HandlerResult<()> {
-        let input_args = StartUploadArgs { blob };
+    /// Begin the upload process with the first chunk of a full file. Subsequent chunks
+    /// should be uploaded with the UploadChunk operation.
+    pub fn start_upload(&self, chunk: FileChunk) -> HandlerResult<()> {
+        let input_args = StartUploadArgs { chunk };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -132,7 +137,7 @@ impl Host {
         .map(|_vec| ())
         .map_err(|e| e.into())
     }
-
+    /// Retreives information about a blob
     pub fn get_object_info(&self, blob: Blob) -> HandlerResult<Blob> {
         let input_args = GetObjectInfoArgs { blob };
         host_call(
@@ -154,6 +159,8 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
+    /// Defines a handler for incoming chunks forwarded by a wasmcloud:blobstore
+    /// provider. Chunks may not be received in order.
     pub fn register_receive_chunk(f: fn(FileChunk) -> HandlerResult<()>) {
         *RECEIVE_CHUNK.write().unwrap() = Some(f);
         register_function(&"ReceiveChunk", receive_chunk_wrapper);
@@ -212,8 +219,8 @@ pub struct StartDownloadArgs {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StartUploadArgs {
-    #[serde(rename = "blob")]
-    pub blob: FileChunk,
+    #[serde(rename = "chunk")]
+    pub chunk: FileChunk,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -228,6 +235,9 @@ pub struct ReceiveChunkArgs {
     pub chunk: FileChunk,
 }
 
+/// Represents a single chunk that may comprise part of a file or an entire file.
+/// The fields for sequence number, total bytes and chunk bytes should be used to
+/// determine the chunk order, as well as the optional context field.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct FileChunk {
     #[serde(rename = "sequenceNo")]
@@ -247,18 +257,22 @@ pub struct FileChunk {
     pub chunk_bytes: Vec<u8>,
 }
 
+/// A container organizes a set of blobs, similar to a directory in a file system.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Container {
     #[serde(rename = "id")]
     pub id: String,
 }
 
+/// A wrapper object around a list of containers.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ContainerList {
     #[serde(rename = "containers")]
     pub containers: Vec<Container>,
 }
 
+/// A blob is a representation of an object in a blobstore, similar to a file in a
+/// file system.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Blob {
     #[serde(rename = "id")]
@@ -269,12 +283,14 @@ pub struct Blob {
     pub byte_size: u64,
 }
 
+/// A wrapper object around a list of blobs.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct BlobList {
     #[serde(rename = "blobs")]
     pub blobs: Vec<Blob>,
 }
 
+/// Used to request a download from a blobstore
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StreamRequest {
     #[serde(rename = "id")]

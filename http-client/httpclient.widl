@@ -1,9 +1,16 @@
 namespace "wasmcloud:httpclient"
 
 role Client {
+  """
+  Perform an HTTP request with the linked http-client provider. Your actor must have an active
+  configured link in order to invoke this function.
+  """
   Request(method: string, url: string, headers: {string: string}, body: bytes): Response
 }
 
+"""
+Response object that is returned from an HTTP request
+"""
 type Response {
   statusCode: u32
   status: string

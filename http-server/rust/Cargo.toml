@@ -1,13 +1,13 @@
 [package]
 name = "wasmcloud-actor-http-server"
-version = "0.1.1"
+version = "0.1.2"
 description = "HTTP Server Actor Interface for wasmCloud Actors"
 authors = ["wasmcloud Team"]
 edition = "2018"
 license = "Apache-2.0"
 documentation = "https://docs.rs/wasmcloud-actor-http-server"
 readme = "README.md"
-keywords = ["webassembly", "wasm", "wascc", "actor"]
+keywords = ["webassembly", "wasm", "wasmcloud", "actor"]
 categories = ["wasm", "api-bindings"]
 
 [features]
@@ -18,12 +18,15 @@ wapc-guest = { version = "0.4.0", optional = true}
 lazy_static = { version = "1.4.0", optional = true}
 serde = { version = "1.0.123" , features = ["derive"] }
 serde_json = "1.0.62"
-serde_derive = "1.0.123"
 serde_bytes = "0.11.5"
 rmp-serde = "0.15.4"
-log = { version="0.4.14", features =["std","serde"]}
 
 [profile.release]
 # Optimize for small code size
 opt-level = "s"
 lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

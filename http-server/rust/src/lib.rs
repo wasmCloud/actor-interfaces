@@ -11,11 +11,12 @@
 //! # Example:
 //! ```
 //! extern crate wasmcloud_actor_http_server as http;
+//! extern crate wasmcloud_actor_core as actorcore;
 //! use wapc_guest::HandlerResult;
 //! use http::{Request, Response, Handlers};
 //!
-//! #[no_mangle]
-//! pub fn wapc_init() {
+//! #[actorcore::init]
+//! pub fn init() {
 //!     http::Handlers::register_handle_request(hello);
 //! }
 //!

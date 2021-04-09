@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,21 +38,17 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Request a Globally Unique Identifier
     pub fn request_guid(&self) -> HandlerResult<String> {
-        let input_args = RequestGuidArgs {};
-        host_call(
-            &self.binding,
-            "wasmcloud:extras",
-            "RequestGuid",
-            &serialize(input_args)?,
-        )
-        .map(|vec| {
-            let resp = deserialize::<String>(vec.as_ref()).unwrap();
-            resp
-        })
-        .map_err(|e| e.into())
+        host_call(&self.binding, "wasmcloud:extras", "RequestGuid", &vec![])
+            .map(|vec| {
+                let resp = deserialize::<String>(vec.as_ref()).unwrap();
+                resp
+            })
+            .map_err(|e| e.into())
     }
-
+    /// Request a random number with minimum and maximum parameters. Inclusivity depends
+    /// on implementation and is not guaranteed on either end
     pub fn request_random(&self, min: u32, max: u32) -> HandlerResult<u32> {
         let input_args = RequestRandomArgs { min, max };
         host_call(
@@ -72,14 +63,13 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Request the next number in a monotonically increasing sequence, starting at 0
     pub fn request_sequence(&self) -> HandlerResult<u64> {
-        let input_args = RequestSequenceArgs {};
         host_call(
             &self.binding,
             "wasmcloud:extras",
             "RequestSequence",
-            &serialize(input_args)?,
+            &vec![],
         )
         .map(|vec| {
             let resp = deserialize::<u64>(vec.as_ref()).unwrap();
@@ -90,18 +80,12 @@ impl Host {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct RequestGuidArgs {}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct RequestRandomArgs {
     #[serde(rename = "min")]
     pub min: u32,
     #[serde(rename = "max")]
     pub max: u32,
 }
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct RequestSequenceArgs {}
 
 /// The standard function for serializing codec structs into a format that can be
 /// used for message exchange between actor and host. Use of any other function to

@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,6 +38,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Perform an HTTP request with the linked http-client provider. Your actor must
+    /// have an active configured link in order to invoke this function.
     pub fn request(
         &self,
         method: String,
@@ -83,6 +80,7 @@ pub struct RequestArgs {
     pub body: Vec<u8>,
 }
 
+/// Response object that is returned from an HTTP request
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Response {
     #[serde(rename = "statusCode")]

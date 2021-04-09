@@ -1,18 +1,35 @@
 namespace "wasmcloud:messaging"
 
 role Broker {    
+    """
+    Publish a message on a given subject. If a reply is not expected, the value can
+    be left as an empty string.
+    """
     Publish(subject: string, replyTo: string, body: bytes): PublishResponse
+    """
+    Request a response on a given subject in a given timeout
+    """
     Request(subject: string, body: bytes, timeout: i64): BrokerMessage
 }
 
 role Consumer {
+    """
+    Register a function to handle an incoming message. Incoming messages can either be
+    delivered via an active subscription or through a direct actor call
+    """
     HandleMessage{message: BrokerMessage}: void
 }
 
+"""
+Indicates if a publish was successful
+"""
 type PublishResponse {
     published: bool
 }
 
+"""
+Incoming message object with an optionally empty reply field
+"""
 type BrokerMessage {
     subject: string
     replyTo: string

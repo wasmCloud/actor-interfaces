@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,6 +38,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
+    /// Publish a message on a given subject. If a reply is not expected, the value can
+    /// be left as an empty string.
     pub fn publish(
         &self,
         subject: String,
@@ -66,7 +63,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
+    /// Request a response on a given subject in a given timeout
     pub fn request(
         &self,
         subject: String,
@@ -97,6 +94,8 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
+    /// Register a function to handle an incoming message. Incoming messages can either
+    /// be delivered via an active subscription or through a direct actor call
     pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
         *HANDLE_MESSAGE.write().unwrap() = Some(f);
         register_function(&"HandleMessage", handle_message_wrapper);
@@ -104,9 +103,8 @@ impl Handlers {
 }
 
 #[cfg(feature = "guest")]
-lazy_static! {
-    static ref HANDLE_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> =
-        RwLock::new(None);
+lazy_static::lazy_static! {
+static ref HANDLE_MESSAGE: std::sync::RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> = std::sync::RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
@@ -139,12 +137,14 @@ pub struct RequestArgs {
     pub timeout: i64,
 }
 
+/// Indicates if a publish was successful
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct PublishResponse {
     #[serde(rename = "published")]
     pub published: bool,
 }
 
+/// Incoming message object with an optionally empty reply field
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct BrokerMessage {
     #[serde(rename = "subject")]
