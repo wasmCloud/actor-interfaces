@@ -44,7 +44,11 @@ pub fn default() -> Host {
 #[cfg(feature = "guest")]
 impl Host {
     /// Execute a query on a given graph
-    pub(crate) fn _query_graph(&self, graph_name: String, query: String) -> HandlerResult<QueryResponse> {
+    pub(crate) fn _query_graph(
+        &self,
+        graph_name: String,
+        query: String,
+    ) -> HandlerResult<QueryResponse> {
         let input_args = QueryGraphArgs { graph_name, query };
         host_call(
             &self.binding,

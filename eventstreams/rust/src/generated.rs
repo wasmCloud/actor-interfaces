@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -91,9 +86,8 @@ impl Handlers {
 }
 
 #[cfg(feature = "guest")]
-lazy_static! {
-    static ref DELIVER_EVENT: RwLock<Option<fn(Event) -> HandlerResult<EventAck>>> =
-        RwLock::new(None);
+lazy_static::lazy_static! {
+static ref DELIVER_EVENT: std::sync::RwLock<Option<fn(Event) -> HandlerResult<EventAck>>> = std::sync::RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
