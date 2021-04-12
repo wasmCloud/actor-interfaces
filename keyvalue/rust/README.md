@@ -17,7 +17,7 @@ The following is an example usage:
 extern crate serde_json;
 extern crate wasmcloud_actor_http_server as http;
 extern crate wasmcloud_actor_keyvalue as kv;
-extern crate wasmcloud_actor_core as actorcore;
+extern crate wasmcloud_actor_core as actor;
 
 use http::{self, Request, Response};
 use wascap_guest::HandlerResult;
@@ -25,7 +25,7 @@ use wascap_guest::HandlerResult;
 #[macro_use]
 extern crate serde_json;
 
-#[actorcore::init]
+#[actor::init]
 pub fn init() {
     http::Handlers::register_handle_request(increment_counter);
 }

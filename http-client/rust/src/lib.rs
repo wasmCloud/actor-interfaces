@@ -12,11 +12,11 @@
 //! use wapc_guest::HandlerResult;
 //! extern crate wasmcloud_actor_http_server as httpserver;
 //! extern crate wasmcloud_actor_http_client as httpclient;
-//! extern crate wasmcloud_actor_core as actorcore;
+//! extern crate wasmcloud_actor_core as actor;
 //!
 //! const API_URL: &str = "https://wasmcloudapi.cloud.io/proxy";
 //!
-//! #[actorcore::init]
+//! #[actor::init]
 //! pub fn init() {
 //!     httpserver::Handlers::register_handle_request(get_proxy);
 //! }

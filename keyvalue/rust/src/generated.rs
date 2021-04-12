@@ -240,7 +240,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-    /// Returns a value stored at a key if it exists
+    /// Indicates if a key exists
     pub fn key_exists(&self, key: String) -> HandlerResult<GetResponse> {
         let input_args = KeyExistsArgs { key };
         host_call(

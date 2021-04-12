@@ -57,7 +57,7 @@ role Store {
     """
     SetQuery(key: string): SetQueryResponse
     """
-    Returns a value stored at a key if it exists
+    Indicates if a key exists
     """
     KeyExists(key: string): GetResponse
 }

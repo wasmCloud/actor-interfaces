@@ -1,12 +1,8 @@
-.PHONY: all deps codegen build clean doc test
+.PHONY: all deps build clean doc test
 
-all: deps codegen build
+all: deps build
 
 deps:
-
-# Manual modifications have been make to generated.rs, so this step is commented out
-# codegen:
-# 	wapc generate codegen.yaml
 
 build:
 	cargo build 

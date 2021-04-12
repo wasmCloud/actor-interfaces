@@ -809,7 +809,8 @@ func (o *FileChunk) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
-// A container organizes a set of blobs, similar to a directory in a file system.
+// A container is a logical grouping of blobs, similar to a directory in a file
+// system.
 type Container struct {
 	ID string
 }

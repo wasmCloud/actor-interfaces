@@ -13,7 +13,8 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// A function that can respond to health checks
+    /// This operation is invoked by the host runtime to determine the health of an
+    /// actor
     pub fn register_health_request(
         f: fn(HealthCheckRequest) -> HandlerResult<HealthCheckResponse>,
     ) {
@@ -32,7 +33,7 @@ fn health_request_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<HealthCheckRequest>(input_payload)?;
     let lock = HEALTH_REQUEST.read().unwrap().unwrap();
     let result = lock(input)?;
-    Ok(serialize(result)?)
+    serialize(result)
 }
 
 /// Represents the data sent to a capability provider at link time
@@ -41,16 +42,15 @@ pub struct CapabilityConfiguration {
     /// The module name
     #[serde(rename = "module")]
     pub module: String,
-    /// A map of values that represent the configuration properties
+    /// A map of values that represent the configuration values
     #[serde(rename = "values")]
     pub values: std::collections::HashMap<String, String>,
 }
 
-/// A request sent to the actor by the host itself in order to determine health
-/// status
+/// A request sent to the actor by the host in order to determine health status
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct HealthCheckRequest {
-    /// TODO: Figure out what goes here
+    /// Since we cannot currently serialize empty requests, this placeholder is required
     #[serde(rename = "placeholder")]
     pub placeholder: bool,
 }

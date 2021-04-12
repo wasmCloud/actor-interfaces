@@ -25,5 +25,5 @@ lazy_static = "1.4.0"
 
 # Publishes rustdocs with guest feature flag
 [package.metadata.docs.rs]
-features = ["guest", "wasmcloud-actor-core-derive"]
-rustdoc-args = ["--cfg", "feature=\"guest\"", "--cfg", "feature=\"wasmcloud-actor-core-derive\""]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

@@ -2,7 +2,8 @@ import { Decoder, Writer, Encoder, Sizer, Codec } from "@wapc/as-msgpack";
 
 import { register } from "@wapc/as-guest";
 export class Handlers {
-  // A function that can respond to health checks
+  // This operation is invoked by the host runtime to determine the health of an
+  // actor
   static registerHealthRequest(
     handler: (request: HealthCheckRequest) => HealthCheckResponse
   ): void {
@@ -24,7 +25,7 @@ function HealthRequestWrapper(payload: ArrayBuffer): ArrayBuffer {
 export class CapabilityConfiguration implements Codec {
   // The module name
   module: string = "";
-  // A map of values that represent the configuration properties
+  // A map of values that represent the configuration values
   values: Map<string, string> = new Map<string, string>();
 
   static decodeNullable(decoder: Decoder): CapabilityConfiguration | null {
@@ -111,10 +112,9 @@ export class CapabilityConfigurationBuilder {
   }
 }
 
-// A request sent to the actor by the host itself in order to determine health
-// status
+// A request sent to the actor by the host in order to determine health status
 export class HealthCheckRequest implements Codec {
-  // TODO: Figure out what goes here
+  // Since we cannot currently serialize empty requests, this placeholder is required
   placeholder: bool = false;
 
   static decodeNullable(decoder: Decoder): HealthCheckRequest | null {

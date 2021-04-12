@@ -30,7 +30,7 @@ fn handle_request_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<Request>(input_payload)?;
     let lock = HANDLE_REQUEST.read().unwrap().unwrap();
     let result = lock(input)?;
-    Ok(serialize(result)?)
+    serialize(result)
 }
 
 /// HTTP Request object

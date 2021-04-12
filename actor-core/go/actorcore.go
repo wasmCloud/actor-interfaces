@@ -6,7 +6,8 @@ import (
 )
 
 type Handlers struct {
-	// A function that can respond to health checks
+	// This operation is invoked by the host runtime to determine the health of an
+	// actor
 	HealthRequest func(request HealthCheckRequest) (HealthCheckResponse, error)
 }
 
@@ -36,7 +37,7 @@ func healthRequestWrapper(payload []byte) ([]byte, error) {
 type CapabilityConfiguration struct {
 	// The module name
 	Module string
-	// A map of values that represent the configuration properties
+	// A map of values that represent the configuration values
 	Values map[string]string
 }
 
@@ -118,10 +119,9 @@ func (o *CapabilityConfiguration) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
-// A request sent to the actor by the host itself in order to determine health
-// status
+// A request sent to the actor by the host in order to determine health status
 type HealthCheckRequest struct {
-	// TODO: Figure out what goes here
+	// Since we cannot currently serialize empty requests, this placeholder is required
 	Placeholder bool
 }
 

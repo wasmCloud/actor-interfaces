@@ -15,12 +15,12 @@ The following is an example of how to use this provider:
 
 ```rust
 extern crate wasmcloud_actor_http_server as http;
-extern crate wasmcloud_actor_core as actorcore;
+extern crate wasmcloud_actor_core as actor;
 
 #[macro_use]
 extern crate serde_json;
 
-#[actorcore::init]
+#[actor::init]
 pub fn init() {
     http::Handlers::register_handle_request(increment_counter);
 }

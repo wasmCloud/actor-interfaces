@@ -9,12 +9,12 @@
 //! ```rust
 //! extern crate wasmcloud_actor_http_server as http;
 //! extern crate wasmcloud_actor_logging as logging;
-//! extern crate wasmcloud_actor_core as actorcore;
+//! extern crate wasmcloud_actor_core as actor;
 //! use wapc_guest::HandlerResult;
 //! use http::{Request, Response, Handlers};
 //! use log::{info, warn, error, trace, debug};
 //!
-//! #[actorcore::init]
+//! #[actor::init]
 //! pub fn init() {
 //!     http::Handlers::register_handle_request(method_logger);
 //!     /// Initialize the logger to enable log macros

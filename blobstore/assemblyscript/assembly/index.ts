@@ -682,7 +682,8 @@ export class FileChunkBuilder {
   }
 }
 
-// A container organizes a set of blobs, similar to a directory in a file system.
+// A container is a logical grouping of blobs, similar to a directory in a file
+// system.
 export class Container implements Codec {
   id: string = "";
 

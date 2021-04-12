@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -168,9 +163,8 @@ impl Handlers {
 }
 
 #[cfg(feature = "guest")]
-lazy_static! {
-    static ref RECEIVE_CHUNK: RwLock<Option<fn(FileChunk) -> HandlerResult<()>>> =
-        RwLock::new(None);
+lazy_static::lazy_static! {
+static ref RECEIVE_CHUNK: std::sync::RwLock<Option<fn(FileChunk) -> HandlerResult<()>>> = std::sync::RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
@@ -178,7 +172,7 @@ fn receive_chunk_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<ReceiveChunkArgs>(input_payload)?;
     let lock = RECEIVE_CHUNK.read().unwrap().unwrap();
     let result = lock(input.chunk)?;
-    Ok(serialize(result)?)
+    serialize(result)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -257,7 +251,8 @@ pub struct FileChunk {
     pub chunk_bytes: Vec<u8>,
 }
 
-/// A container organizes a set of blobs, similar to a directory in a file system.
+/// A container is a logical grouping of blobs, similar to a directory in a file
+/// system.
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Container {
     #[serde(rename = "id")]

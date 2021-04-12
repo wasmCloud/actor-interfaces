@@ -11,11 +11,11 @@
 //! use wasmcloud_actor_graphdb as graph;
 //! use graph::*;
 //! use wasmcloud_actor_http_server as http;
-//! use wasmcloud_actor_core as actorcore;
+//! use wasmcloud_actor_core as actor;
 //!
 //! use guest::prelude::*;
 //!
-//! #[actorcore::init]
+//! #[actor::init]
 //! pub fn init() {
 //!     http::Handlers::register_handle_request(handle_http_request);
 //! }

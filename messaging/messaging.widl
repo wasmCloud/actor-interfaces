@@ -14,8 +14,7 @@ role Broker {
 
 role Consumer {
     """
-    Register a function to handle an incoming message. Incoming messages can either be
-    delivered via an active subscription or through a direct actor call
+    Register a function to handle an incoming message.
     """
     HandleMessage{message: BrokerMessage}: void
 }

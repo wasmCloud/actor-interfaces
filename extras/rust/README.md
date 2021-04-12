@@ -20,13 +20,13 @@ Example:
 ```rust
 extern crate wapc_guest as guest;
 use guest::prelude::*;
-use wasmcloud_actor_core as actorcore;
+use wasmcloud_actor_core as actor;
 use wasmcloud_actor_extras as extras;
 use wasmcloud_actor_http_server as http;
 use serde_json::json;
 use log::{error, info};
 
-#[actorcore::init]
+#[actor::init]
 pub fn init() {
     http::Handlers::register_handle_request(generate_guid);
 }

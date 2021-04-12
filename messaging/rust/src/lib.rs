@@ -8,11 +8,11 @@
 //! # Example:
 //! ```rust
 //! extern crate wasmcloud_actor_messaging as messaging;
-//! extern crate wasmcloud_actor_core as actorcore;
+//! extern crate wasmcloud_actor_core as actor;
 //! extern crate wapc_guest as guest;
 //! use guest::prelude::*;
 //!
-//! #[actorcore::init]
+//! #[actor::init]
 //! pub fn init() {
 //!     messaging::Handlers::register_handle_message(handle_message);
 //! }

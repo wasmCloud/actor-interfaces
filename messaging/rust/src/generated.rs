@@ -94,8 +94,7 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// Register a function to handle an incoming message. Incoming messages can either
-    /// be delivered via an active subscription or through a direct actor call
+    /// Register a function to handle an incoming message.
     pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
         *HANDLE_MESSAGE.write().unwrap() = Some(f);
         register_function(&"HandleMessage", handle_message_wrapper);
@@ -112,7 +111,7 @@ fn handle_message_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<BrokerMessage>(input_payload)?;
     let lock = HANDLE_MESSAGE.read().unwrap().unwrap();
     let result = lock(input)?;
-    Ok(serialize(result)?)
+    serialize(result)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]

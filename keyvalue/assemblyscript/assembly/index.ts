@@ -202,7 +202,7 @@ export class Host {
     return SetQueryResponse.decode(decoder);
   }
 
-  // Returns a value stored at a key if it exists
+  // Indicates if a key exists
   keyExists(key: string): GetResponse {
     const inputArgs = new KeyExistsArgs();
     inputArgs.key = key;
