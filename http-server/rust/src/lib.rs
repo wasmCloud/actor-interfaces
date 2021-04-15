@@ -14,7 +14,6 @@
 //! use wasmcloud_actor_core as actor;
 //! use wapc_guest::HandlerResult;
 //! use http::{Request, Response, Handlers, Method};
-//! use std::str::FromStr;
 //!
 //! #[actor::init]
 //! fn init() {
@@ -22,11 +21,10 @@
 //! }
 //!
 //! fn req_handler(req: http::Request) -> HandlerResult<http::Response> {
-//!     let method = Method::from_str(&req.method)?;
-//!     let path = req.path.to_string();
-//!     let segments = path.split('/').skip(1).collect::<Vec<_>>();
+//!     let method = req.method();
+//!     let segments = req.path_segments();
 //!
-//!     match (&method, &*segments)  {
+//!     match (method, &*segments)  {
 //!         (Method::Get, &["v0", "users", id]) => get_user(id),
 //!         (Method::Put, &["v1", "users", id]) => update_user(id, &req.body),
 //!         _ => Ok(http::Response::not_found())
@@ -51,6 +49,18 @@ pub use route::Method;
 #[cfg(feature = "guest")]
 pub use generated::Handlers;
 pub use generated::{deserialize, serialize, Request, Response};
+
+use std::str::FromStr;
+
+impl Request {
+    pub fn path_segments(&self) -> Vec<&str> {
+        self.path.split('/').skip(1).collect::<Vec<_>>()
+    }
+
+    pub fn method(&self) -> Method {
+        Method::from_str(&self.method).unwrap()
+    }
+}
 
 impl Response {
     /// Creates a response with a given status code and serializes the given payload as JSON
