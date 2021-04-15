@@ -6,28 +6,47 @@
 //! must have an active, configured binding to an HTTP Server capability provider.
 //!
 //! The HTTP Server provider is one-way, and only delivers messages to actors. Actors cannot make host calls
-//! to this provider.
-
+//! to this provider. To make outbound http requests, actors will need to use a `wasmcloud:httpclient` provider.
+//!
 //! # Example:
 //! ```
-//! extern crate wasmcloud_actor_http_server as http;
+//! use wasmcloud_actor_http_server as http;
+//! use wasmcloud_actor_core as actor;
 //! use wapc_guest::HandlerResult;
-//! use http::{Request, Response, Handlers};
+//! use http::{Request, Response, Handlers, Method};
+//! use std::str::FromStr;
 //!
-//! #[no_mangle]
-//! pub fn wapc_init() {
-//!     http::Handlers::register_handle_request(hello);
+//! #[actor::init]
+//! fn init() {
+//!     http::Handlers::register_handle_request(req_handler);
 //! }
 //!
-//! fn hello(_msg: http::Request) -> HandlerResult<http::Response> {
+//! fn req_handler(req: http::Request) -> HandlerResult<http::Response> {
+//!     let method = Method::from_str(&req.method)?;
+//!     let path = req.path.to_string();
+//!     let segments = path.split('/').skip(1).collect::<Vec<_>>();
+//!
+//!     match (&method, &*segments)  {
+//!         (Method::Get, &["v0", "users", id]) => get_user(id),
+//!         (Method::Put, &["v1", "users", id]) => update_user(id, &req.body),
+//!         _ => Ok(http::Response::not_found())
+//!     }
+//! }
+//!
+//! fn get_user(id: &str) -> HandlerResult<http::Response> {
+//!     Ok(http::Response::ok())
+//! }
+//! fn update_user(id: &str, body: &[u8]) -> HandlerResult<http::Response> {
 //!     Ok(http::Response::ok())
 //! }
 //! ```
-//!
 
 pub mod generated;
+mod route;
 use serde::Serialize;
 use std::collections::HashMap;
+
+pub use route::Method;
 
 #[cfg(feature = "guest")]
 pub use generated::Handlers;
