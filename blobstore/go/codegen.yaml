@@ -1,14 +1,11 @@
 schema: ../blobstore.widl
 generates:
-  pkg/module/module.go:
-    package: widl-codegen/language/tinygo
+  blobstore.go:
+    module: '@wapc/widl-codegen/tinygo'
     visitorClass: ModuleVisitor
     config:
-      package: module
-  pkg/main.go:
-    ifNotExists: true
-    package: widl-codegen/language/tinygo
-    visitorClass: ScaffoldVisitor
-    config:
-      import: github.com/myorg/mymodule/pkg/module
-      package: module
+      package: blobstore
+      hostRoles:
+        - Store
+      handlerRoles:
+        - Actor

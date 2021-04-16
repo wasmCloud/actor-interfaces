@@ -14,15 +14,16 @@ to this provider.
 The following is an example of how to use this provider:
 
 ```rust
-extern crate actor_http_server as http;
-
-#[no_mangle]
-pub fn wapc_init() {
-    http::Handlers::register_handle_request(increment_counter);
-}
+extern crate wasmcloud_actor_http_server as http;
+extern crate wasmcloud_actor_core as actor;
 
 #[macro_use]
 extern crate serde_json;
+
+#[actor::init]
+pub fn init() {
+    http::Handlers::register_handle_request(increment_counter);
+}
 
 fn increment_counter(msg: http::Request) -> HandlerResult<http::Response> {
     Ok(http::Response::ok())

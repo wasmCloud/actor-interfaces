@@ -1,7 +1,9 @@
 schema: ../logging.widl
 generates:
   logging.go:
-    package: widl-codegen/language/tinygo
+    module: '@wapc/widl-codegen/tinygo'
     visitorClass: ModuleVisitor
     config:
       package: logging
+      hostRoles:
+        - Logger

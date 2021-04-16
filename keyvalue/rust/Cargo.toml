@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-keyvalue"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the key-value contract for use by wasmCloud Actors"
@@ -21,3 +21,8 @@ serde_bytes = "0.11.5"
 rmp-serde = "0.15.4"
 log = { version="0.4.14", features =["std","serde"]}
 lazy_static = "1.4.0"
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

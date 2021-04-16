@@ -1,31 +1,60 @@
 namespace "wasmcloud:eventstreams"
 
-interface {       
+role Producer {    
+    """
+    Write an event to the given stream ID
+    """
     WriteEvent(streamId: string, values: {string: string}): EventAck
+    """
+    Query a stream for the list of events
+    """
     QueryStream{query: StreamQuery}: EventList
 }
 
+role Consumer {
+    """
+    Handle an incoming event
+    """
+    DeliverEvent{event: Event}: EventAck
+}
+
+"""
+A single event that occurred on a given stream
+"""
 type Event {
     eventId: string
     streamId: string
     values: {string: string}
 }
 
+"""
+Result object used for error handling and acknowledgement of events
+"""
 type EventAck {
     eventId: string?
     error: string?
 }
 
+"""
+Wrapper object around a list of events
+"""
 type EventList {
     events: [Event]
 }
 
+"""
+Used to query a stream for events with a maximum event count
+and optional time frame
+"""
 type StreamQuery {
     streamId: string
     range: TimeRange?
     count: u64
 }
 
+"""
+Defines a range of time with a minimum and maximum timestamp (epoch time)
+"""
 type TimeRange {
     minTime: u64
     maxTime: u64

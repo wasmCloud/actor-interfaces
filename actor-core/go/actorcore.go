@@ -5,42 +5,39 @@ import (
 	wapc "github.com/wapc/wapc-guest-tinygo"
 )
 
-/* - Core can only handle, there's nothing to call on the host.
- * Removed host struct.
- */
-
-// Handlers is used to define handler functions for supported `wasmcloud:core` operations
 type Handlers struct {
+	// This operation is invoked by the host runtime to determine the health of an
+	// actor
 	HealthRequest func(request HealthCheckRequest) (HealthCheckResponse, error)
 }
 
-// Register creates the handler mapping used by the host runtime
 func (h Handlers) Register() {
 	if h.HealthRequest != nil {
-		HealthRequestHandler = h.HealthRequest
+		healthRequestHandler = h.HealthRequest
 		wapc.RegisterFunction("HealthRequest", healthRequestWrapper)
 	}
 }
 
 var (
-	// HealthRequestHandler is a function that can respond to health checks
-	HealthRequestHandler func(request HealthCheckRequest) (HealthCheckResponse, error)
+	healthRequestHandler func(request HealthCheckRequest) (HealthCheckResponse, error)
 )
 
 func healthRequestWrapper(payload []byte) ([]byte, error) {
 	decoder := msgpack.NewDecoder(payload)
 	var request HealthCheckRequest
 	request.Decode(&decoder)
-	response, err := HealthRequestHandler(request)
+	response, err := healthRequestHandler(request)
 	if err != nil {
 		return nil, err
 	}
-	return response.ToBuffer(), nil
+	return msgpack.ToBytes(&response)
 }
 
-// CapabilityConfiguration represents the data sent to a capability provider at link time
+// Represents the data sent to a capability provider at link time
 type CapabilityConfiguration struct {
+	// The module name
 	Module string
+	// A map of values that represent the configuration values
 	Values map[string]string
 }
 
@@ -122,17 +119,9 @@ func (o *CapabilityConfiguration) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
-func (o *CapabilityConfiguration) ToBuffer() []byte {
-	var sizer msgpack.Sizer
-	o.Encode(&sizer)
-	buffer := make([]byte, sizer.Len())
-	encoder := msgpack.NewEncoder(buffer)
-	o.Encode(&encoder)
-	return buffer
-}
-
-// HealthCheckRequest is sent by the host to determine if an actor is healthy
+// A request sent to the actor by the host in order to determine health status
 type HealthCheckRequest struct {
+	// Since we cannot currently serialize empty requests, this placeholder is required
 	Placeholder bool
 }
 
@@ -188,18 +177,14 @@ func (o *HealthCheckRequest) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
-func (o *HealthCheckRequest) ToBuffer() []byte {
-	var sizer msgpack.Sizer
-	o.Encode(&sizer)
-	buffer := make([]byte, sizer.Len())
-	encoder := msgpack.NewEncoder(buffer)
-	o.Encode(&encoder)
-	return buffer
-}
-
-// HealthCheckResponse is returned by an actor to indicate the level of health/readiness to the host
+// All actors must return a health check response to the host upon receipt of a
+// health request. Returning in `Err` indicates total actor failure, while
+// returning a valid response with the `healthy` flag set to false indicates that
+// the actor has somehow detected that it cannot perform its given task
 type HealthCheckResponse struct {
+	// A flag that indicates the the actor is healthy
 	Healthy bool
+	// A message containing additional information about the actors health
 	Message string
 }
 
@@ -257,13 +242,4 @@ func (o *HealthCheckResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString(o.Message)
 
 	return nil
-}
-
-func (o *HealthCheckResponse) ToBuffer() []byte {
-	var sizer msgpack.Sizer
-	o.Encode(&sizer)
-	buffer := make([]byte, sizer.Len())
-	encoder := msgpack.NewEncoder(buffer)
-	o.Encode(&encoder)
-	return buffer
 }

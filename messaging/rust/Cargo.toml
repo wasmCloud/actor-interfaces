@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-messaging"
-version = "0.1.1"
+version = "0.1.2"
 description = "Messaging wasmCloud Actor Interface"
 authors = ["wasmCloud Team"]
 edition = "2018"
@@ -24,4 +24,9 @@ rmp-serde = "0.15.4"
 structopt = "0.3.21"
 serde_json = "1.0.62"
 base64 = "0.13.0"
-wasmcloud-actor-core = { git = "https://github.com/wasmcloud/actor-interfaces", branch = "main", features = ["guest"]}
+wasmcloud-actor-core = { version = "0.2.2", features = ["guest"]}
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

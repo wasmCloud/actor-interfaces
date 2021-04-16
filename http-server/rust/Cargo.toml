@@ -18,10 +18,18 @@ wapc-guest = { version = "0.4.0", optional = true}
 lazy_static = { version = "1.4.0", optional = true}
 serde = { version = "1.0.123" , features = ["derive"] }
 serde_json = "1.0.62"
-serde_derive = "1.0.123"
 serde_bytes = "0.11.5"
 rmp-serde = "0.15.4"
-log = { version="0.4.14", features =["std","serde"]}
 
 [dev-dependencies]
 wasmcloud-actor-core= { version = "0.2.2", features = ["guest"]}
+
+[profile.release]
+# Optimize for small code size
+opt-level = "s"
+lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

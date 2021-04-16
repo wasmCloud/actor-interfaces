@@ -27,7 +27,7 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding for the telnet capability
+/// Creates a named host binding
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
@@ -35,7 +35,7 @@ pub fn host(binding: &str) -> Host {
     }
 }
 
-/// Creates the default host binding for the telnet capability
+/// Creates the default host binding
 #[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
@@ -44,8 +44,8 @@ pub fn default() -> Host {
 #[cfg(feature = "guest")]
 impl Host {
     /// Sends a string of text to a given session. The provider is not responsible for
-    /// indicating if this is a valid session or not. The telnet provider will not automatically
-    /// add newlines or carriage returns.
+    /// indicating if this is a valid session or not. The telnet provider will not
+    /// automatically add newlines or carriage returns.
     pub fn send_text(&self, session: String, text: String) -> HandlerResult<TelnetResult> {
         let input_args = SendTextArgs { session, text };
         host_call(
@@ -67,13 +67,12 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// Register a function to receive session information when a user connects
-    /// to the linked telnet provider
+    /// Indicates that a telnet client has connected with a given session ID
     pub fn register_session_started(f: fn(String) -> HandlerResult<TelnetResult>) {
         *SESSION_STARTED.write().unwrap() = Some(f);
         register_function(&"SessionStarted", session_started_wrapper);
     }
-    /// Register a function to handle text received from the linked telnet provider
+    /// Invoked when a given session sends a string of text through their telnet session
     pub fn register_receive_text(f: fn(String, String) -> HandlerResult<TelnetResult>) {
         *RECEIVE_TEXT.write().unwrap() = Some(f);
         register_function(&"ReceiveText", receive_text_wrapper);
@@ -105,6 +104,14 @@ fn receive_text_wrapper(input_payload: &[u8]) -> CallResult {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct SendTextArgs {
+    #[serde(rename = "session")]
+    pub session: String,
+    #[serde(rename = "text")]
+    pub text: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SessionStartedArgs {
     #[serde(rename = "session")]
     pub session: String,
@@ -118,14 +125,8 @@ pub struct ReceiveTextArgs {
     pub text: String,
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct SendTextArgs {
-    #[serde(rename = "session")]
-    pub session: String,
-    #[serde(rename = "text")]
-    pub text: String,
-}
-
+/// Result type for telnet operations including a success value and optional error
+/// information
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct TelnetResult {
     #[serde(rename = "success")]

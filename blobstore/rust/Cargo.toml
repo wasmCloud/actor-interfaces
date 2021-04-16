@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-actor-blobstore"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["wasmCloud Team"]
 edition = "2018"
 description = "Interface to the blobstore contract for use by wasmCloud Actors"
@@ -22,7 +22,6 @@ serde_json = "1.0.57"
 serde_derive = "1.0.123"
 serde_bytes = "0.11.5"
 rmp-serde = "0.15.4"
-log = { version="0.4.14", features =["std","serde"]}
 
 [dev-dependencies]
 structopt = "0.3.21"
@@ -36,3 +35,8 @@ wasmcloud-actor-http-server = { version = "0.1.1", features = ["guest"] }
 # Optimize for small code size
 opt-level = "s"
 lto = true
+
+# Publishes rustdocs with guest feature flag
+[package.metadata.docs.rs]
+features = ["guest"]
+rustdoc-args = ["--cfg", "feature=\"guest\""]

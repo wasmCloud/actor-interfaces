@@ -1,6 +1,6 @@
 {
   "name": "@wasmcloud/actor-keyvalue",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Interface to the keyvalue contract for use by wasmCloud Actors",
   "author": "wasmCloud Team",
   "scripts": {

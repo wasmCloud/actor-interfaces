@@ -15,18 +15,13 @@ wasmCloud actors without this permission and capability binding will be unable t
 use wapc_guest::HandlerResult;
 extern crate wasmcloud_actor_http_server as httpserver;
 extern crate wasmcloud_actor_http_client as httpclient;
-extern crate wasmcloud_actor_core as core;
+extern crate wasmcloud_actor_core as actor;
 
 const API_URL: &str = "https://wasmcloudapi.cloud.io/proxy";
 
-#[no_mangle]
-pub fn wapc_init() {
+#[actor::init]
+pub fn init() {
     httpserver::Handlers::register_handle_request(get_proxy);
-    core::Handlers::register_health_request(health);
-}
-
-fn health(_: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
-  Ok(core::HealthCheckResponse::healthy())   
 }
 
 /// This function proxys an inbound HTTP request to an external server

@@ -1,15 +1,11 @@
 .PHONY: all deps codegen build clean doc test
 
-all: deps build
+all: deps codegen build
 
 deps:
 
-# codegen:
-# 	wapc generate codegen.yaml
-
-build:
-	mkdir -p build
-	tinygo build -o build/tinygo.wasm -target wasm -no-debug pkg/main.go
+codegen:
+	wapc generate codegen.yaml
 
 clean:
 	rm -Rf build

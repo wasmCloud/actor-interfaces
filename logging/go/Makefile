@@ -1,6 +1,6 @@
-.PHONY: all deps codegen build clean doc test
+.PHONY: all deps codegen clean doc test
 
-all: deps codegen build
+all: deps codegen
 
 deps:
 

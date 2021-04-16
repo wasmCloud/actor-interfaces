@@ -20,16 +20,15 @@ Example:
 ```rust
 extern crate wapc_guest as guest;
 use guest::prelude::*;
-use wasmcloud_actor_core as core;
+use wasmcloud_actor_core as actor;
 use wasmcloud_actor_extras as extras;
 use wasmcloud_actor_http_server as http;
 use serde_json::json;
 use log::{error, info};
 
-#[no_mangle]
-pub fn wapc_init() {
+#[actor::init]
+pub fn init() {
     http::Handlers::register_handle_request(generate_guid);
-    core::Handlers::register_health_request(health);
 }
 
 /// Generate a Guid and return it in a JSON envelope
@@ -40,10 +39,6 @@ fn generate_guid(_req: http::Request) -> HandlerResult<http::Response> {
   let result = json!({"guid": guid });
   Ok(http::Response::json(&result, 200, "OK"))
 
-}
-
-fn health(_: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
-  Ok(core::HealthCheckResponse::healthy())   
 }
 ```
 

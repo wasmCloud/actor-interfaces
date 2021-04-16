@@ -6,31 +6,33 @@ import (
 )
 
 type Handlers struct {
+	// Register a function to handle an incoming HTTP request from a linked provider
 	HandleRequest func(request Request) (Response, error)
 }
 
 func (h Handlers) Register() {
 	if h.HandleRequest != nil {
-		HandleRequestHandler = h.HandleRequest
-		wapc.RegisterFunction("HandleRequest", HandleRequestWrapper)
+		handleRequestHandler = h.HandleRequest
+		wapc.RegisterFunction("HandleRequest", handleRequestWrapper)
 	}
 }
 
 var (
-	HandleRequestHandler func(request Request) (Response, error)
+	handleRequestHandler func(request Request) (Response, error)
 )
 
-func HandleRequestWrapper(payload []byte) ([]byte, error) {
+func handleRequestWrapper(payload []byte) ([]byte, error) {
 	decoder := msgpack.NewDecoder(payload)
 	var request Request
 	request.Decode(&decoder)
-	response, err := HandleRequestHandler(request)
+	response, err := handleRequestHandler(request)
 	if err != nil {
 		return nil, err
 	}
 	return msgpack.ToBytes(&response)
 }
 
+// HTTP Request object
 type Request struct {
 	Method      string
 	Path        string
@@ -129,6 +131,7 @@ func (o *Request) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// HTTP Response object
 type Response struct {
 	StatusCode uint32
 	Status     string

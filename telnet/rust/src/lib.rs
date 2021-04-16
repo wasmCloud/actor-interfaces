@@ -8,11 +8,11 @@
 //! # Example:
 //! ```
 //! extern crate wasmcloud_actor_telnet as telnet;
-//! extern crate wasmcloud_actor_core as actorcore;
+//! extern crate wasmcloud_actor_core as actor;
 //! use telnet::TelnetResult;
 //! use wapc_guest::HandlerResult;
 //!
-//! #[actorcore::init]
+//! #[actor::init]
 //! pub fn init() {
 //!     telnet::Handlers::register_session_started(session_started);
 //!     telnet::Handlers::register_receive_text(receive_text);

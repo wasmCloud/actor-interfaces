@@ -11,19 +11,17 @@
 //! use wasmcloud_actor_graphdb as graph;
 //! use graph::*;
 //! use wasmcloud_actor_http_server as http;
-//! use wasmcloud_actor_core as actor_core;
+//! use wasmcloud_actor_core as actor;
 //!
 //! use guest::prelude::*;
 //!
-//! #[no_mangle]
-//! pub fn wapc_init() {
+//! #[actor::init]
+//! pub fn init() {
 //!     http::Handlers::register_handle_request(handle_http_request);
-//!     actor_core::Handlers::register_health_request(health);
 //! }
 //!
 //! fn handle_http_request(_: http::Request) -> HandlerResult<http::Response> {
-//!     // Replace `query_db` with `graph::default().query_graph()`
-//!     let (name, birth_year): (String, u32) = query_db(
+//!     let (name, birth_year): (String, u32) = graph::default().query_graph(
 //!         "MotoGP".to_string(),
 //!         "MATCH (r:Rider)-[:rides]->(t:Team) WHERE t.name = 'Yamaha' RETURN r.name, r.birth_year"
 //!             .to_string(),
@@ -40,45 +38,11 @@
 //!     Ok(http::Response::json(result, 200, "OK"))
 //! }
 //!
-//! fn health(_: actor_core::HealthCheckRequest) -> HandlerResult<actor_core::HealthCheckResponse> {
-//!   Ok(actor_core::HealthCheckResponse::healthy())   
-//! }
-//!
-//! # fn query_db<T: graph::FromTable>(graph_name: String, query: String) -> ::wapc_guest::HandlerResult<T> {
-//! #    T::from_table(&ResultSet {
-//! #       statistics: vec![],
-//! #       columns: vec![
-//! #           Column {
-//! #               scalars: Some(vec![Scalar {
-//! #                   bool_value: None,
-//! #                   double_value: None,
-//! #                   int_value: None,
-//! #                   string_value: Some("Alice Rider".to_string()),
-//! #               }]),
-//! #               nodes: Some(vec![]),
-//! #               relations: Some(vec![]),
-//! #           },
-//! #           Column {
-//! #               scalars: Some(vec![Scalar {
-//! #                   bool_value: None,
-//! #                   double_value: None,
-//! #                   int_value: Some(1985),
-//! #                   string_value: None,
-//! #               }]),
-//! #               nodes: Some(vec![]),
-//! #               relations: Some(vec![]),
-//! #           },
-//! #       ],
-//! #    }).map_err(|e| format!("{}", e).into())
-//! # }
 //! ```
 
 pub mod generated;
 #[allow(unused_imports)]
 pub use generated::*;
-#[macro_use]
-#[cfg(feature = "guest")]
-extern crate log;
 #[macro_use]
 #[cfg(feature = "guest")]
 extern crate serde_derive;
@@ -109,11 +73,9 @@ impl Host {
         graph_name: String,
         query: String,
     ) -> ::wapc_guest::HandlerResult<T> {
-        info!("querying graph");
         let res = self
-            .query(graph_name.into(), query.into())
+            ._query_graph(graph_name.into(), query.into())
             .map(|res| T::from_table(&res.result_set));
-        info!("came back from query");
         match res {
             Ok(Ok(l)) => Ok(l),
             _ => Err("Graph conversion error".into()),

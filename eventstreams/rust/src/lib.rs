@@ -7,7 +7,6 @@
 //! # Example:
 //! ```
 //! extern crate wasmcloud_actor_core as actor;
-//! use actor::init;
 //! extern crate wasmcloud_actor_eventstreams as streams;
 //! extern crate wasmcloud_actor_http_server as http;
 //!

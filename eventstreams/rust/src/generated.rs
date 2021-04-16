@@ -3,7 +3,6 @@ use rmps::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-extern crate log;
 #[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
@@ -13,6 +12,7 @@ use guest::prelude::*;
 pub struct Host {
     binding: String,
 }
+
 #[cfg(feature = "guest")]
 impl Default for Host {
     fn default() -> Self {
@@ -22,32 +22,29 @@ impl Default for Host {
     }
 }
 
+/// Creates a named host binding
 #[cfg(feature = "guest")]
-/// Creates a named host binding for the event streams capability
 pub fn host(binding: &str) -> Host {
     Host {
         binding: binding.to_string(),
     }
 }
 
+/// Creates the default host binding
 #[cfg(feature = "guest")]
-/// Creates the default host binding for the event streams capability
 pub fn default() -> Host {
     Host::default()
 }
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Writes a map of key-value pairs to the given event stream
+    /// Write an event to the given stream ID
     pub fn write_event(
         &self,
         stream_id: String,
         values: std::collections::HashMap<String, String>,
     ) -> HandlerResult<EventAck> {
-        let input_args = WriteEventArgs {
-            stream_id: stream_id,
-            values: values,
-        };
+        let input_args = WriteEventArgs { stream_id, values };
         host_call(
             &self.binding,
             "wasmcloud:eventstreams",
@@ -60,8 +57,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Queries the stream per the parameters in the supplied query
+    /// Query a stream for the list of events
     pub fn query_stream(&self, query: StreamQuery) -> HandlerResult<EventList> {
         host_call(
             &self.binding,
@@ -77,6 +73,31 @@ impl Host {
     }
 }
 
+#[cfg(feature = "guest")]
+pub struct Handlers {}
+
+#[cfg(feature = "guest")]
+impl Handlers {
+    /// Handle an incoming event
+    pub fn register_deliver_event(f: fn(Event) -> HandlerResult<EventAck>) {
+        *DELIVER_EVENT.write().unwrap() = Some(f);
+        register_function(&"DeliverEvent", deliver_event_wrapper);
+    }
+}
+
+#[cfg(feature = "guest")]
+lazy_static::lazy_static! {
+static ref DELIVER_EVENT: std::sync::RwLock<Option<fn(Event) -> HandlerResult<EventAck>>> = std::sync::RwLock::new(None);
+}
+
+#[cfg(feature = "guest")]
+fn deliver_event_wrapper(input_payload: &[u8]) -> CallResult {
+    let input = deserialize::<Event>(input_payload)?;
+    let lock = DELIVER_EVENT.read().unwrap().unwrap();
+    let result = lock(input)?;
+    Ok(serialize(result)?)
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct WriteEventArgs {
     #[serde(rename = "streamId")]
@@ -85,6 +106,7 @@ pub struct WriteEventArgs {
     pub values: std::collections::HashMap<String, String>,
 }
 
+/// A single event that occurred on a given stream
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Event {
     #[serde(rename = "eventId")]
@@ -95,6 +117,7 @@ pub struct Event {
     pub values: std::collections::HashMap<String, String>,
 }
 
+/// Result object used for error handling and acknowledgement of events
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct EventAck {
     #[serde(rename = "eventId")]
@@ -103,12 +126,15 @@ pub struct EventAck {
     pub error: Option<String>,
 }
 
+/// Wrapper object around a list of events
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct EventList {
     #[serde(rename = "events")]
     pub events: Vec<Event>,
 }
 
+/// Used to query a stream for events with a maximum event count and optional time
+/// frame
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StreamQuery {
     #[serde(rename = "streamId")]
@@ -119,6 +145,7 @@ pub struct StreamQuery {
     pub count: u64,
 }
 
+/// Defines a range of time with a minimum and maximum timestamp (epoch time)
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct TimeRange {
     #[serde(rename = "minTime")]

@@ -1,4 +1,4 @@
-package blobstore 
+package blobstore
 
 import (
 	msgpack "github.com/wapc/tinygo-msgpack"
@@ -15,9 +15,10 @@ func NewHost(binding string) *Host {
 	}
 }
 
-func (h *Host) CreateContainer(id string) (Container, error) {
+// Create a container in a blobstore. Returns the container created if successful
+func (h *Host) CreateContainer(container Container) (Container, error) {
 	inputArgs := CreateContainerArgs{
-		ID: id,
+		Container: container,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
@@ -36,52 +37,46 @@ func (h *Host) CreateContainer(id string) (Container, error) {
 	return DecodeContainer(&decoder)
 }
 
-func (h *Host) RemoveContainer(id string) (BlobstoreResult, error) {
+// Remove a container from a blobstore
+func (h *Host) RemoveContainer(container Container) error {
 	inputArgs := RemoveContainerArgs{
-		ID: id,
+		Container: container,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
-		return BlobstoreResult{}, err
+		return err
 	}
-	payload, err := wapc.HostCall(
+	_, err = wapc.HostCall(
 		h.binding,
 		"wasmcloud:blobstore",
 		"RemoveContainer",
 		inputBytes,
 	)
-	if err != nil {
-		return BlobstoreResult{}, err
-	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeBlobstoreResult(&decoder)
+	return err
 }
 
-func (h *Host) RemoveObject(id string, container_id string) (BlobstoreResult, error) {
+// Remove an object from a blobstore
+func (h *Host) RemoveObject(blob Blob) error {
 	inputArgs := RemoveObjectArgs{
-		ID:           id,
-		Container_id: container_id,
+		Blob: blob,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
-		return BlobstoreResult{}, err
+		return err
 	}
-	payload, err := wapc.HostCall(
+	_, err = wapc.HostCall(
 		h.binding,
 		"wasmcloud:blobstore",
 		"RemoveObject",
 		inputBytes,
 	)
-	if err != nil {
-		return BlobstoreResult{}, err
-	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeBlobstoreResult(&decoder)
+	return err
 }
 
-func (h *Host) ListObjects(container_id string) (BlobList, error) {
+// Returns a list of blobs that are present in the specified container
+func (h *Host) ListObjects(container Container) (BlobList, error) {
 	inputArgs := ListObjectsArgs{
-		Container_id: container_id,
+		Container: container,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
@@ -100,56 +95,68 @@ func (h *Host) ListObjects(container_id string) (BlobList, error) {
 	return DecodeBlobList(&decoder)
 }
 
+// Upload a file chunk to a blobstore, which may only be part of a full file. This
+// must be called AFTER the StartUpload operation. Chunks should be small, as
+// memory over a few megabytes may exceed the wasm memory allocation.
 func (h *Host) UploadChunk(chunk FileChunk) error {
-	inputBytes, err := msgpack.ToBytes(&chunk)
-	if err != nil {
-		return err
-	}
-	_, err = wapc.HostCall(h.binding, "wasmcloud:blobstore", "UploadChunk", inputBytes)
-	return err
-}
-
-func (h *Host) StartDownload(blob_id string, container_id string, chunk_size uint64, context *string) (BlobstoreResult, error) {
-	inputArgs := StartDownloadArgs{
-		Blob_id:      blob_id,
-		Container_id: container_id,
-		Chunk_size:   chunk_size,
-		Context:      context,
+	inputArgs := UploadChunkArgs{
+		Chunk: chunk,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
-		return BlobstoreResult{}, err
+		return err
 	}
-	payload, err := wapc.HostCall(
+	_, err = wapc.HostCall(
+		h.binding,
+		"wasmcloud:blobstore",
+		"UploadChunk",
+		inputBytes,
+	)
+	return err
+}
+
+// Issue a request to start a download from a blobstore. Chunks will be sent to the
+// function that's registered with the ReceiveChunk operation.
+func (h *Host) StartDownload(request StreamRequest) error {
+	inputArgs := StartDownloadArgs{
+		Request: request,
+	}
+	inputBytes, err := msgpack.ToBytes(&inputArgs)
+	if err != nil {
+		return err
+	}
+	_, err = wapc.HostCall(
 		h.binding,
 		"wasmcloud:blobstore",
 		"StartDownload",
 		inputBytes,
 	)
-	if err != nil {
-		return BlobstoreResult{}, err
-	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeBlobstoreResult(&decoder)
+	return err
 }
 
-func (h *Host) StartUpload(blob FileChunk) (BlobstoreResult, error) {
-	inputBytes, err := msgpack.ToBytes(&blob)
-	if err != nil {
-		return BlobstoreResult{}, err
+// Begin the upload process with the first chunk of a full file. Subsequent chunks
+// should be uploaded with the UploadChunk operation.
+func (h *Host) StartUpload(chunk FileChunk) error {
+	inputArgs := StartUploadArgs{
+		Chunk: chunk,
 	}
-	payload, err := wapc.HostCall(h.binding, "wasmcloud:blobstore", "StartUpload", inputBytes)
+	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
-		return BlobstoreResult{}, err
+		return err
 	}
-	decoder := msgpack.NewDecoder(payload)
-	return DecodeBlobstoreResult(&decoder)
+	_, err = wapc.HostCall(
+		h.binding,
+		"wasmcloud:blobstore",
+		"StartUpload",
+		inputBytes,
+	)
+	return err
 }
 
-func (h *Host) GetObjectInfo(blob_id string, container_id string) (Blob, error) {
+// Retreives information about a blob
+func (h *Host) GetObjectInfo(blob Blob) (Blob, error) {
 	inputArgs := GetObjectInfoArgs{
-		Blob_id:      blob_id,
-		Container_id: container_id,
+		Blob: blob,
 	}
 	inputBytes, err := msgpack.ToBytes(&inputArgs)
 	if err != nil {
@@ -168,171 +175,28 @@ func (h *Host) GetObjectInfo(blob_id string, container_id string) (Blob, error) 
 	return DecodeBlob(&decoder)
 }
 
-func (h *Host) ReceiveChunk(chunk FileChunk) error {
-	inputBytes, err := msgpack.ToBytes(&chunk)
-	if err != nil {
-		return err
-	}
-	_, err = wapc.HostCall(h.binding, "wasmcloud:blobstore", "ReceiveChunk", inputBytes)
-	return err
-}
-
 type Handlers struct {
-	CreateContainer func(id string) (Container, error)
-	RemoveContainer func(id string) (BlobstoreResult, error)
-	RemoveObject    func(id string, container_id string) (BlobstoreResult, error)
-	ListObjects     func(container_id string) (BlobList, error)
-	UploadChunk     func(chunk FileChunk) error
-	StartDownload   func(blob_id string, container_id string, chunk_size uint64, context *string) (BlobstoreResult, error)
-	StartUpload     func(blob FileChunk) (BlobstoreResult, error)
-	GetObjectInfo   func(blob_id string, container_id string) (Blob, error)
-	ReceiveChunk    func(chunk FileChunk) error
+	// Defines a handler for incoming chunks forwarded by a wasmcloud:blobstore
+	// provider. Chunks may not be received in order.
+	ReceiveChunk func(chunk FileChunk) error
 }
 
 func (h Handlers) Register() {
-	if h.CreateContainer != nil {
-		CreateContainerHandler = h.CreateContainer
-		wapc.RegisterFunction("CreateContainer", CreateContainerWrapper)
-	}
-	if h.RemoveContainer != nil {
-		RemoveContainerHandler = h.RemoveContainer
-		wapc.RegisterFunction("RemoveContainer", RemoveContainerWrapper)
-	}
-	if h.RemoveObject != nil {
-		RemoveObjectHandler = h.RemoveObject
-		wapc.RegisterFunction("RemoveObject", RemoveObjectWrapper)
-	}
-	if h.ListObjects != nil {
-		ListObjectsHandler = h.ListObjects
-		wapc.RegisterFunction("ListObjects", ListObjectsWrapper)
-	}
-	if h.UploadChunk != nil {
-		UploadChunkHandler = h.UploadChunk
-		wapc.RegisterFunction("UploadChunk", UploadChunkWrapper)
-	}
-	if h.StartDownload != nil {
-		StartDownloadHandler = h.StartDownload
-		wapc.RegisterFunction("StartDownload", StartDownloadWrapper)
-	}
-	if h.StartUpload != nil {
-		StartUploadHandler = h.StartUpload
-		wapc.RegisterFunction("StartUpload", StartUploadWrapper)
-	}
-	if h.GetObjectInfo != nil {
-		GetObjectInfoHandler = h.GetObjectInfo
-		wapc.RegisterFunction("GetObjectInfo", GetObjectInfoWrapper)
-	}
 	if h.ReceiveChunk != nil {
-		ReceiveChunkHandler = h.ReceiveChunk
-		wapc.RegisterFunction("ReceiveChunk", ReceiveChunkWrapper)
+		receiveChunkHandler = h.ReceiveChunk
+		wapc.RegisterFunction("ReceiveChunk", receiveChunkWrapper)
 	}
 }
 
 var (
-	CreateContainerHandler func(id string) (Container, error)
-	RemoveContainerHandler func(id string) (BlobstoreResult, error)
-	RemoveObjectHandler    func(id string, container_id string) (BlobstoreResult, error)
-	ListObjectsHandler     func(container_id string) (BlobList, error)
-	UploadChunkHandler     func(chunk FileChunk) error
-	StartDownloadHandler   func(blob_id string, container_id string, chunk_size uint64, context *string) (BlobstoreResult, error)
-	StartUploadHandler     func(blob FileChunk) (BlobstoreResult, error)
-	GetObjectInfoHandler   func(blob_id string, container_id string) (Blob, error)
-	ReceiveChunkHandler    func(chunk FileChunk) error
+	receiveChunkHandler func(chunk FileChunk) error
 )
 
-func CreateContainerWrapper(payload []byte) ([]byte, error) {
+func receiveChunkWrapper(payload []byte) ([]byte, error) {
 	decoder := msgpack.NewDecoder(payload)
-	var inputArgs CreateContainerArgs
+	var inputArgs ReceiveChunkArgs
 	inputArgs.Decode(&decoder)
-	response, err := CreateContainerHandler(inputArgs.ID)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func RemoveContainerWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs RemoveContainerArgs
-	inputArgs.Decode(&decoder)
-	response, err := RemoveContainerHandler(inputArgs.ID)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func RemoveObjectWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs RemoveObjectArgs
-	inputArgs.Decode(&decoder)
-	response, err := RemoveObjectHandler(inputArgs.ID, inputArgs.Container_id)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func ListObjectsWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs ListObjectsArgs
-	inputArgs.Decode(&decoder)
-	response, err := ListObjectsHandler(inputArgs.Container_id)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func UploadChunkWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var request FileChunk
-	request.Decode(&decoder)
-	err := UploadChunkHandler(request)
-	if err != nil {
-		return nil, err
-	}
-	return []byte{}, nil
-}
-
-func StartDownloadWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs StartDownloadArgs
-	inputArgs.Decode(&decoder)
-	response, err := StartDownloadHandler(inputArgs.Blob_id, inputArgs.Container_id, inputArgs.Chunk_size, inputArgs.Context)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func StartUploadWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var request FileChunk
-	request.Decode(&decoder)
-	response, err := StartUploadHandler(request)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func GetObjectInfoWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var inputArgs GetObjectInfoArgs
-	inputArgs.Decode(&decoder)
-	response, err := GetObjectInfoHandler(inputArgs.Blob_id, inputArgs.Container_id)
-	if err != nil {
-		return nil, err
-	}
-	return msgpack.ToBytes(&response)
-}
-
-func ReceiveChunkWrapper(payload []byte) ([]byte, error) {
-	decoder := msgpack.NewDecoder(payload)
-	var request FileChunk
-	request.Decode(&decoder)
-	err := ReceiveChunkHandler(request)
+	err := receiveChunkHandler(inputArgs.Chunk)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +204,7 @@ func ReceiveChunkWrapper(payload []byte) ([]byte, error) {
 }
 
 type CreateContainerArgs struct {
-	ID string
+	Container Container
 }
 
 func DecodeCreateContainerArgsNullable(decoder *msgpack.Decoder) (*CreateContainerArgs, error) {
@@ -370,8 +234,8 @@ func (o *CreateContainerArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "id":
-			o.ID, err = decoder.ReadString()
+		case "container":
+			o.Container, err = DecodeContainer(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -389,14 +253,14 @@ func (o *CreateContainerArgs) Encode(encoder msgpack.Writer) error {
 		return nil
 	}
 	encoder.WriteMapSize(1)
-	encoder.WriteString("id")
-	encoder.WriteString(o.ID)
+	encoder.WriteString("container")
+	o.Container.Encode(encoder)
 
 	return nil
 }
 
 type RemoveContainerArgs struct {
-	ID string
+	Container Container
 }
 
 func DecodeRemoveContainerArgsNullable(decoder *msgpack.Decoder) (*RemoveContainerArgs, error) {
@@ -426,8 +290,8 @@ func (o *RemoveContainerArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "id":
-			o.ID, err = decoder.ReadString()
+		case "container":
+			o.Container, err = DecodeContainer(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -445,15 +309,14 @@ func (o *RemoveContainerArgs) Encode(encoder msgpack.Writer) error {
 		return nil
 	}
 	encoder.WriteMapSize(1)
-	encoder.WriteString("id")
-	encoder.WriteString(o.ID)
+	encoder.WriteString("container")
+	o.Container.Encode(encoder)
 
 	return nil
 }
 
 type RemoveObjectArgs struct {
-	ID           string
-	Container_id string
+	Blob Blob
 }
 
 func DecodeRemoveObjectArgsNullable(decoder *msgpack.Decoder) (*RemoveObjectArgs, error) {
@@ -483,10 +346,8 @@ func (o *RemoveObjectArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "id":
-			o.ID, err = decoder.ReadString()
-		case "container_id":
-			o.Container_id, err = decoder.ReadString()
+		case "blob":
+			o.Blob, err = DecodeBlob(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -503,17 +364,15 @@ func (o *RemoveObjectArgs) Encode(encoder msgpack.Writer) error {
 		encoder.WriteNil()
 		return nil
 	}
-	encoder.WriteMapSize(2)
-	encoder.WriteString("id")
-	encoder.WriteString(o.ID)
-	encoder.WriteString("container_id")
-	encoder.WriteString(o.Container_id)
+	encoder.WriteMapSize(1)
+	encoder.WriteString("blob")
+	o.Blob.Encode(encoder)
 
 	return nil
 }
 
 type ListObjectsArgs struct {
-	Container_id string
+	Container Container
 }
 
 func DecodeListObjectsArgsNullable(decoder *msgpack.Decoder) (*ListObjectsArgs, error) {
@@ -543,8 +402,8 @@ func (o *ListObjectsArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "container_id":
-			o.Container_id, err = decoder.ReadString()
+		case "container":
+			o.Container, err = DecodeContainer(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -562,17 +421,70 @@ func (o *ListObjectsArgs) Encode(encoder msgpack.Writer) error {
 		return nil
 	}
 	encoder.WriteMapSize(1)
-	encoder.WriteString("container_id")
-	encoder.WriteString(o.Container_id)
+	encoder.WriteString("container")
+	o.Container.Encode(encoder)
+
+	return nil
+}
+
+type UploadChunkArgs struct {
+	Chunk FileChunk
+}
+
+func DecodeUploadChunkArgsNullable(decoder *msgpack.Decoder) (*UploadChunkArgs, error) {
+	if isNil, err := decoder.IsNextNil(); isNil || err != nil {
+		return nil, err
+	}
+	decoded, err := DecodeUploadChunkArgs(decoder)
+	return &decoded, err
+}
+
+func DecodeUploadChunkArgs(decoder *msgpack.Decoder) (UploadChunkArgs, error) {
+	var o UploadChunkArgs
+	err := o.Decode(decoder)
+	return o, err
+}
+
+func (o *UploadChunkArgs) Decode(decoder *msgpack.Decoder) error {
+	numFields, err := decoder.ReadMapSize()
+	if err != nil {
+		return err
+	}
+
+	for numFields > 0 {
+		numFields--
+		field, err := decoder.ReadString()
+		if err != nil {
+			return err
+		}
+		switch field {
+		case "chunk":
+			o.Chunk, err = DecodeFileChunk(decoder)
+		default:
+			err = decoder.Skip()
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *UploadChunkArgs) Encode(encoder msgpack.Writer) error {
+	if o == nil {
+		encoder.WriteNil()
+		return nil
+	}
+	encoder.WriteMapSize(1)
+	encoder.WriteString("chunk")
+	o.Chunk.Encode(encoder)
 
 	return nil
 }
 
 type StartDownloadArgs struct {
-	Blob_id      string
-	Container_id string
-	Chunk_size   uint64
-	Context      *string
+	Request StreamRequest
 }
 
 func DecodeStartDownloadArgsNullable(decoder *msgpack.Decoder) (*StartDownloadArgs, error) {
@@ -602,23 +514,8 @@ func (o *StartDownloadArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "blob_id":
-			o.Blob_id, err = decoder.ReadString()
-		case "container_id":
-			o.Container_id, err = decoder.ReadString()
-		case "chunk_size":
-			o.Chunk_size, err = decoder.ReadUint64()
-		case "context":
-			isNil, err := decoder.IsNextNil()
-			if err == nil {
-				if isNil {
-					o.Context = nil
-				} else {
-					var nonNil string
-					nonNil, err = decoder.ReadString()
-					o.Context = &nonNil
-				}
-			}
+		case "request":
+			o.Request, err = DecodeStreamRequest(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -635,26 +532,71 @@ func (o *StartDownloadArgs) Encode(encoder msgpack.Writer) error {
 		encoder.WriteNil()
 		return nil
 	}
-	encoder.WriteMapSize(4)
-	encoder.WriteString("blob_id")
-	encoder.WriteString(o.Blob_id)
-	encoder.WriteString("container_id")
-	encoder.WriteString(o.Container_id)
-	encoder.WriteString("chunk_size")
-	encoder.WriteUint64(o.Chunk_size)
-	encoder.WriteString("context")
-	if o.Context == nil {
-		encoder.WriteNil()
-	} else {
-		encoder.WriteString(*o.Context)
+	encoder.WriteMapSize(1)
+	encoder.WriteString("request")
+	o.Request.Encode(encoder)
+
+	return nil
+}
+
+type StartUploadArgs struct {
+	Chunk FileChunk
+}
+
+func DecodeStartUploadArgsNullable(decoder *msgpack.Decoder) (*StartUploadArgs, error) {
+	if isNil, err := decoder.IsNextNil(); isNil || err != nil {
+		return nil, err
+	}
+	decoded, err := DecodeStartUploadArgs(decoder)
+	return &decoded, err
+}
+
+func DecodeStartUploadArgs(decoder *msgpack.Decoder) (StartUploadArgs, error) {
+	var o StartUploadArgs
+	err := o.Decode(decoder)
+	return o, err
+}
+
+func (o *StartUploadArgs) Decode(decoder *msgpack.Decoder) error {
+	numFields, err := decoder.ReadMapSize()
+	if err != nil {
+		return err
+	}
+
+	for numFields > 0 {
+		numFields--
+		field, err := decoder.ReadString()
+		if err != nil {
+			return err
+		}
+		switch field {
+		case "chunk":
+			o.Chunk, err = DecodeFileChunk(decoder)
+		default:
+			err = decoder.Skip()
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
+func (o *StartUploadArgs) Encode(encoder msgpack.Writer) error {
+	if o == nil {
+		encoder.WriteNil()
+		return nil
+	}
+	encoder.WriteMapSize(1)
+	encoder.WriteString("chunk")
+	o.Chunk.Encode(encoder)
+
+	return nil
+}
+
 type GetObjectInfoArgs struct {
-	Blob_id      string
-	Container_id string
+	Blob Blob
 }
 
 func DecodeGetObjectInfoArgsNullable(decoder *msgpack.Decoder) (*GetObjectInfoArgs, error) {
@@ -684,10 +626,8 @@ func (o *GetObjectInfoArgs) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "blob_id":
-			o.Blob_id, err = decoder.ReadString()
-		case "container_id":
-			o.Container_id, err = decoder.ReadString()
+		case "blob":
+			o.Blob, err = DecodeBlob(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -704,35 +644,32 @@ func (o *GetObjectInfoArgs) Encode(encoder msgpack.Writer) error {
 		encoder.WriteNil()
 		return nil
 	}
-	encoder.WriteMapSize(2)
-	encoder.WriteString("blob_id")
-	encoder.WriteString(o.Blob_id)
-	encoder.WriteString("container_id")
-	encoder.WriteString(o.Container_id)
+	encoder.WriteMapSize(1)
+	encoder.WriteString("blob")
+	o.Blob.Encode(encoder)
 
 	return nil
 }
 
-type BlobstoreResult struct {
-	Success bool
-	Error   *string
+type ReceiveChunkArgs struct {
+	Chunk FileChunk
 }
 
-func DecodeBlobstoreResultNullable(decoder *msgpack.Decoder) (*BlobstoreResult, error) {
+func DecodeReceiveChunkArgsNullable(decoder *msgpack.Decoder) (*ReceiveChunkArgs, error) {
 	if isNil, err := decoder.IsNextNil(); isNil || err != nil {
 		return nil, err
 	}
-	decoded, err := DecodeBlobstoreResult(decoder)
+	decoded, err := DecodeReceiveChunkArgs(decoder)
 	return &decoded, err
 }
 
-func DecodeBlobstoreResult(decoder *msgpack.Decoder) (BlobstoreResult, error) {
-	var o BlobstoreResult
+func DecodeReceiveChunkArgs(decoder *msgpack.Decoder) (ReceiveChunkArgs, error) {
+	var o ReceiveChunkArgs
 	err := o.Decode(decoder)
 	return o, err
 }
 
-func (o *BlobstoreResult) Decode(decoder *msgpack.Decoder) error {
+func (o *ReceiveChunkArgs) Decode(decoder *msgpack.Decoder) error {
 	numFields, err := decoder.ReadMapSize()
 	if err != nil {
 		return err
@@ -745,19 +682,8 @@ func (o *BlobstoreResult) Decode(decoder *msgpack.Decoder) error {
 			return err
 		}
 		switch field {
-		case "success":
-			o.Success, err = decoder.ReadBool()
-		case "error":
-			isNil, err := decoder.IsNextNil()
-			if err == nil {
-				if isNil {
-					o.Error = nil
-				} else {
-					var nonNil string
-					nonNil, err = decoder.ReadString()
-					o.Error = &nonNil
-				}
-			}
+		case "chunk":
+			o.Chunk, err = DecodeFileChunk(decoder)
 		default:
 			err = decoder.Skip()
 		}
@@ -769,24 +695,21 @@ func (o *BlobstoreResult) Decode(decoder *msgpack.Decoder) error {
 	return nil
 }
 
-func (o *BlobstoreResult) Encode(encoder msgpack.Writer) error {
+func (o *ReceiveChunkArgs) Encode(encoder msgpack.Writer) error {
 	if o == nil {
 		encoder.WriteNil()
 		return nil
 	}
-	encoder.WriteMapSize(2)
-	encoder.WriteString("success")
-	encoder.WriteBool(o.Success)
-	encoder.WriteString("error")
-	if o.Error == nil {
-		encoder.WriteNil()
-	} else {
-		encoder.WriteString(*o.Error)
-	}
+	encoder.WriteMapSize(1)
+	encoder.WriteString("chunk")
+	o.Chunk.Encode(encoder)
 
 	return nil
 }
 
+// Represents a single chunk that may comprise part of a file or an entire file.
+// The fields for sequence number, total bytes and chunk bytes should be used to
+// determine the chunk order, as well as the optional context field.
 type FileChunk struct {
 	SequenceNo uint64
 	Container  Container
@@ -886,6 +809,8 @@ func (o *FileChunk) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A container is a logical grouping of blobs, similar to a directory in a file
+// system.
 type Container struct {
 	ID string
 }
@@ -942,6 +867,7 @@ func (o *Container) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A wrapper object around a list of containers.
 type ContainerList struct {
 	Containers []Container
 }
@@ -1014,6 +940,8 @@ func (o *ContainerList) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A blob is a representation of an object in a blobstore, similar to a file in a
+// file system.
 type Blob struct {
 	ID        string
 	Container Container
@@ -1080,6 +1008,7 @@ func (o *Blob) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// A wrapper object around a list of blobs.
 type BlobList struct {
 	Blobs []Blob
 }
@@ -1152,6 +1081,7 @@ func (o *BlobList) Encode(encoder msgpack.Writer) error {
 	return nil
 }
 
+// Used to request a download from a blobstore
 type StreamRequest struct {
 	ID        string
 	Container Container

@@ -4,8 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[cfg(feature = "guest")]
-use crate::OP_REQUEST;
-#[cfg(feature = "guest")]
 extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
@@ -40,10 +38,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Make an HTTP request with specified method, headers and body to url.
-    /// This request must be carried out by an appropriately bound capability
-    /// provider implementing `wasmcloud:httpclient`, the request is not
-    /// made directly by the actor.
+    /// Perform an HTTP request with the linked http-client provider. Your actor must
+    /// have an active configured link in order to invoke this function.
     pub fn request(
         &self,
         method: String,
@@ -60,7 +56,7 @@ impl Host {
         host_call(
             &self.binding,
             "wasmcloud:httpclient",
-            OP_REQUEST,
+            "Request",
             &serialize(input_args)?,
         )
         .map(|vec| {
@@ -84,6 +80,7 @@ pub struct RequestArgs {
     pub body: Vec<u8>,
 }
 
+/// Response object that is returned from an HTTP request
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Response {
     #[serde(rename = "statusCode")]

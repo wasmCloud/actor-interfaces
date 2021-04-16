@@ -8,7 +8,6 @@ extern crate wapc_guest as guest;
 #[cfg(feature = "guest")]
 use guest::prelude::*;
 
-/// The abstraction of the key-value host capability
 #[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
@@ -23,7 +22,7 @@ impl Default for Host {
     }
 }
 
-/// Creates a named host binding for the key-value store capability
+/// Creates a named host binding
 #[cfg(feature = "guest")]
 pub fn host(binding: &str) -> Host {
     Host {
@@ -31,7 +30,7 @@ pub fn host(binding: &str) -> Host {
     }
 }
 
-/// Creates the default host binding for the key-value store capability
+/// Creates the default host binding
 #[cfg(feature = "guest")]
 pub fn default() -> Host {
     Host::default()
@@ -39,9 +38,10 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Retrieves a value stored in a given key
+    /// Gets a value for a specified key. If the key doesn't exist, this function will
+    /// not panic, instead the response type will indicate that it does not exist.
     pub fn get(&self, key: String) -> HandlerResult<GetResponse> {
-        let input_args = GetArgs { key: key };
+        let input_args = GetArgs { key };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -54,14 +54,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Adds a number to the value stored at a given key. Will return an error
-    /// if you attempt to add a value to an existing key that is holding a string
+    /// Add a given numeric value to a key
     pub fn add(&self, key: String, value: i32) -> HandlerResult<AddResponse> {
-        let input_args = AddArgs {
-            key: key,
-            value: value,
-        };
+        let input_args = AddArgs { key, value };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -74,14 +69,12 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Sets the given value for the key with an optional expiration period. Set expiration to 0
-    /// for a value that does not expire.
+    /// Sets the string value of a key
     pub fn set(&self, key: String, value: String, expires: i32) -> HandlerResult<SetResponse> {
         let input_args = SetArgs {
-            key: key,
-            value: value,
-            expires: expires,
+            key,
+            value,
+            expires,
         };
         host_call(
             &self.binding,
@@ -95,10 +88,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Deletes the specified key
+    /// Delete a key
     pub fn del(&self, key: String) -> HandlerResult<DelResponse> {
-        let input_args = DelArgs { key: key };
+        let input_args = DelArgs { key };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -111,10 +103,10 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Clears the list at the given key
+    /// Clear a list of its values. Depending on the provider implementation, this may
+    /// delete the list entirely
     pub fn clear(&self, key: String) -> HandlerResult<DelResponse> {
-        let input_args = ClearArgs { key: key };
+        let input_args = ClearArgs { key };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -127,14 +119,10 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Retrieves a range of values stored in a list key
+    /// Retrieve a range of values from a list. Depending on the provider
+    /// implementation, start  and stop may or may not be inclusive.
     pub fn range(&self, key: String, start: i32, stop: i32) -> HandlerResult<ListRangeResponse> {
-        let input_args = RangeArgs {
-            key: key,
-            start: start,
-            stop: stop,
-        };
+        let input_args = RangeArgs { key, start, stop };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -147,13 +135,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Pushes a value onto a list
+    /// Push a value onto a list
     pub fn push(&self, key: String, value: String) -> HandlerResult<ListResponse> {
-        let input_args = PushArgs {
-            key: key,
-            value: value,
-        };
+        let input_args = PushArgs { key, value };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -166,13 +150,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Deletes the given item from a specified list
+    /// Delete an item from a list
     pub fn list_item_delete(&self, key: String, value: String) -> HandlerResult<ListResponse> {
-        let input_args = ListItemDeleteArgs {
-            key: key,
-            value: value,
-        };
+        let input_args = ListItemDeleteArgs { key, value };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -185,13 +165,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Adds a value to a set
+    /// Add an item into a set
     pub fn set_add(&self, key: String, value: String) -> HandlerResult<SetOperationResponse> {
-        let input_args = SetAddArgs {
-            key: key,
-            value: value,
-        };
+        let input_args = SetAddArgs { key, value };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -204,13 +180,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Removes an item from a set
+    /// Remove an item from a set
     pub fn set_remove(&self, key: String, value: String) -> HandlerResult<SetOperationResponse> {
-        let input_args = SetRemoveArgs {
-            key: key,
-            value: value,
-        };
+        let input_args = SetRemoveArgs { key, value };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -223,10 +195,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Returns the union of all sets specified by the list of keys
+    /// Perform and return a set union on a given list of keys
     pub fn set_union(&self, keys: Vec<String>) -> HandlerResult<SetQueryResponse> {
-        let input_args = SetUnionArgs { keys: keys };
+        let input_args = SetUnionArgs { keys };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -239,10 +210,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Returns the intersection of all sets specified by the list of keys
+    /// Perform and return a set intersect on a given list of keys
     pub fn set_intersection(&self, keys: Vec<String>) -> HandlerResult<SetQueryResponse> {
-        let input_args = SetIntersectionArgs { keys: keys };
+        let input_args = SetIntersectionArgs { keys };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -255,10 +225,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Returns the list of members in a set
+    /// Retrieve a list of items stored in a set
     pub fn set_query(&self, key: String) -> HandlerResult<SetQueryResponse> {
-        let input_args = SetQueryArgs { key: key };
+        let input_args = SetQueryArgs { key };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -271,10 +240,9 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Indicates if a given key exists. The "value" field will be empty in this response
+    /// Indicates if a key exists
     pub fn key_exists(&self, key: String) -> HandlerResult<GetResponse> {
-        let input_args = KeyExistsArgs { key: key };
+        let input_args = KeyExistsArgs { key };
         host_call(
             &self.binding,
             "wasmcloud:keyvalue",
@@ -391,6 +359,7 @@ pub struct KeyExistsArgs {
     pub key: String,
 }
 
+/// Response type for Get operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct GetResponse {
     #[serde(rename = "value")]
@@ -399,42 +368,50 @@ pub struct GetResponse {
     pub exists: bool,
 }
 
+/// Response type for Add operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct AddResponse {
     #[serde(rename = "value")]
     pub value: i32,
 }
 
+/// Response type for Delete operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct DelResponse {
     #[serde(rename = "key")]
     pub key: String,
 }
 
+/// Response type for list range operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListRangeResponse {
     #[serde(rename = "values")]
     pub values: Vec<String>,
 }
 
+/// Response type for list push operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListResponse {
     #[serde(rename = "newCount")]
     pub new_count: i32,
 }
 
+/// Response type for the Set operation, not to be confused with the set data
+/// structure
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetResponse {
     #[serde(rename = "value")]
     pub value: String,
 }
 
+/// Response type for set add operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetOperationResponse {
     #[serde(rename = "new_count")]
     pub new_count: i32,
 }
 
+/// Response type for set query operations
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct SetQueryResponse {
     #[serde(rename = "values")]

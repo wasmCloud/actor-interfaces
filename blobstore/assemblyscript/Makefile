@@ -1,15 +1,12 @@
-.PHONY: all deps codegen build clean doc test
+.PHONY: all deps codegen clean doc test
 
-all: deps build
+all: deps codegen
 
 deps:
 	npm install
 
-# codegen:
-# 	wapc generate codegen.yaml
-
-build:
-	npm run build
+codegen:
+	wapc generate codegen.yaml
 
 clean:
 	rm -Rf build

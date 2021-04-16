@@ -1,14 +1,9 @@
 schema: ../core.widl
 generates:
   actorcore.go:
-    package: widl-codegen/language/tinygo
+    module: '@wapc/widl-codegen/tinygo'
     visitorClass: ModuleVisitor
     config:
       package: actorcore
-  #pkg/main.go:
-  #  ifNotExists: true
-  #  package: widl-codegen/language/tinygo
-  #  visitorClass: ScaffoldVisitor
-  #  config:
-  #    import: github.com/myorg/mymodule/pkg/module
-  #    package: module
+      handlerRoles:
+        - Actor

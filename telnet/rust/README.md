@@ -12,14 +12,13 @@ ultimately correlates to an individual connected socket client.
 # Example:
 ```rust
 extern crate wasmcloud_actor_telnet as telnet;
-extern crate wasmcloud_actor_core as actorcore;
+extern crate wasmcloud_actor_core as actor;
 use wapc_guest::HandlerResult;
 
-#[no_mangle]
-pub fn wapc_init() {
+#[actor::init]
+pub fn init() {
     telnet::Handlers::register_session_started(session_started);
     telnet::Handlers::register_receive_text(receive_text);
-    actorcore::Handlers::register_health_request(health);
 }
 
 fn session_started(session: String) -> HandlerResult<bool> {
@@ -31,7 +30,4 @@ fn receive_text(session: String, text: String) -> HandlerResult<bool> {
    Ok(true)
 }
 
-fn health(_h: core::HealthCheckRequest) -> HandlerResult<core::HealthCheckResponse> {
-    Ok(core::HealthCheckResponse::healthy())
-}
 ```

@@ -9,11 +9,6 @@ extern crate wapc_guest as guest;
 use guest::prelude::*;
 
 #[cfg(feature = "guest")]
-use lazy_static::lazy_static;
-#[cfg(feature = "guest")]
-use std::sync::RwLock;
-
-#[cfg(feature = "guest")]
 pub struct Host {
     binding: String,
 }
@@ -43,25 +38,8 @@ pub fn default() -> Host {
 
 #[cfg(feature = "guest")]
 impl Host {
-    /// Publishes a message on a given subject with an optional reply subject
-    ///
-    /// # Arguments
-    ///
-    /// * `subject` - Message subject
-    /// * `reply_to` - Subject to receive message replies. Can be left blank for no reply subject
-    /// * `body` - Message payload
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// fn send_message() {
-    ///     let subject = "first.app".to_string();
-    ///     let reply_to = "".to_string();
-    ///     let body = "hello world".to_string().into_bytes();
-    ///     
-    ///     messaging::default().publish(subject, reply_to, body);
-    /// }
-    /// ```
+    /// Publish a message on a given subject. If a reply is not expected, the value can
+    /// be left as an empty string.
     pub fn publish(
         &self,
         subject: String,
@@ -85,27 +63,7 @@ impl Host {
         })
         .map_err(|e| e.into())
     }
-
-    /// Publishes a message and expects a reply within a given timeout
-    ///
-    /// # Arguments
-    ///
-    /// * `subject` - Message subject
-    /// * `body` - Message payload
-    /// * `timeout` - Timeout, in milliseconds, to wait for a message reply
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// fn hello_there() {
-    ///     let subject = "first.app".to_string();
-    ///     let body = "hello?".to_string().into_bytes();
-    ///     let timeout = 1000;
-    ///     
-    ///     let response = messaging::default().request(subject, body, timeout).unwrap();
-    ///     assert_eq!(String::from_utf8(response.body).unwrap(), "world!");
-    /// }
-    /// ```
+    /// Request a response on a given subject in a given timeout
     pub fn request(
         &self,
         subject: String,
@@ -136,25 +94,7 @@ pub struct Handlers {}
 
 #[cfg(feature = "guest")]
 impl Handlers {
-    /// Registers a function to be invoked upon receiving a message.
-    /// This function should be called with the `wapc_init` block of an
-    /// actor module.
-    ///
-    /// # Example
-    /// ```rust
-    /// extern crate wapc_guest as guest;
-    /// extern crate wasmcloud_actor_messaging as messaging;
-    /// use guest::prelude::*;
-    ///
-    /// #[no_mangle]
-    /// pub fn wapc_init() {
-    ///     messaging::Handlers::register_handle_message(handle_message);
-    /// }
-    ///
-    /// fn handle_message(_msg: messaging::BrokerMessage) -> HandlerResult<()> {
-    ///     todo!()
-    /// }
-    /// ```
+    /// Register a function to handle an incoming message.
     pub fn register_handle_message(f: fn(BrokerMessage) -> HandlerResult<()>) {
         *HANDLE_MESSAGE.write().unwrap() = Some(f);
         register_function(&"HandleMessage", handle_message_wrapper);
@@ -162,9 +102,8 @@ impl Handlers {
 }
 
 #[cfg(feature = "guest")]
-lazy_static! {
-    static ref HANDLE_MESSAGE: RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> =
-        RwLock::new(None);
+lazy_static::lazy_static! {
+static ref HANDLE_MESSAGE: std::sync::RwLock<Option<fn(BrokerMessage) -> HandlerResult<()>>> = std::sync::RwLock::new(None);
 }
 
 #[cfg(feature = "guest")]
@@ -172,7 +111,7 @@ fn handle_message_wrapper(input_payload: &[u8]) -> CallResult {
     let input = deserialize::<BrokerMessage>(input_payload)?;
     let lock = HANDLE_MESSAGE.read().unwrap().unwrap();
     let result = lock(input)?;
-    Ok(serialize(result)?)
+    serialize(result)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -197,12 +136,14 @@ pub struct RequestArgs {
     pub timeout: i64,
 }
 
+/// Indicates if a publish was successful
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct PublishResponse {
     #[serde(rename = "published")]
     pub published: bool,
 }
 
+/// Incoming message object with an optionally empty reply field
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct BrokerMessage {
     #[serde(rename = "subject")]

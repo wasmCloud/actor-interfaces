@@ -1,23 +1,60 @@
 namespace "wasmcloud:blobstore"
 
-interface {        
-    CreateContainer(id: string): Container
-    RemoveContainer(id: string): BlobstoreResult
-    RemoveObject(id: string, container_id: string): BlobstoreResult
-    ListObjects(container_id: string): BlobList
-    UploadChunk{chunk: FileChunk}: void
-    StartDownload(blob_id: string, container_id: string, chunk_size: u64, context: string?): BlobstoreResult
-    StartUpload{blob: FileChunk}: BlobstoreResult    
-    GetObjectInfo(blob_id: string, container_id: string): Blob
-
-    ReceiveChunk{chunk: FileChunk}: void
+role Store {
+    """
+    Create a container in a blobstore.
+    Returns the container created if successful
+    """
+    CreateContainer(container: Container): Container
+    """
+    Remove a container from a blobstore
+    """
+    RemoveContainer(container: Container): void
+    """
+    Remove an object from a blobstore
+    """
+    RemoveObject(blob: Blob): void
+    """
+    Returns a list of blobs that are present in the specified container
+    """
+    ListObjects(container: Container): BlobList
+    """
+    Upload a file chunk to a blobstore, which may only be part of a full file.
+    This must be called AFTER the StartUpload operation. Chunks should be
+    small, as memory over a few megabytes may exceed the wasm memory allocation.
+    """
+    UploadChunk(chunk: FileChunk): void
+    """
+    Issue a request to start a download from a blobstore. Chunks will be sent
+    to the function that's registered with the ReceiveChunk operation.
+    """
+    StartDownload(request: StreamRequest): void
+    """
+    Begin the upload process with the first chunk of a full file. Subsequent
+    chunks should be uploaded with the UploadChunk operation.
+    """
+    StartUpload(chunk: FileChunk): void
+    """
+    Retreives information about a blob
+    """
+    GetObjectInfo(blob: Blob): Blob
 }
 
-type BlobstoreResult {
-    success: bool
-    error: string?
+role Actor {
+    """
+    Defines a handler for incoming chunks forwarded by a
+    wasmcloud:blobstore provider. Chunks may not be
+    received in order.
+    """
+    ReceiveChunk(chunk: FileChunk): void
 }
 
+"""
+Represents a single chunk that may comprise part of a
+file or an entire file. The fields for sequence number,
+total bytes and chunk bytes should be used to determine
+the chunk order, as well as the optional context field.
+"""
 type FileChunk {
     sequenceNo: u64,
     container: Container,
@@ -28,24 +65,40 @@ type FileChunk {
     chunkBytes: bytes
 }
 
+"""
+A container is a logical grouping of blobs, similar to a directory in a file system.
+"""
 type Container {
     id: string
 }
 
+"""
+A wrapper object around a list of containers.
+"""
 type ContainerList {
     containers: [Container]
 }
 
+"""
+A blob is a representation of an object in a blobstore, similar to a file
+in a file system.
+"""
 type Blob {
     id: string
     container: Container
     byteSize: u64
 }
 
+"""
+A wrapper object around a list of blobs.
+"""
 type BlobList {
     blobs: [Blob]
 }
 
+"""
+Used to request a download from a blobstore
+"""
 type StreamRequest {
     id: string
     container: Container

@@ -27,10 +27,7 @@
 //! Also, in keeping with the notion of _stateless_ actors, avoid using this function to initialize or create global state.
 
 mod generated;
-pub use generated::{
-    deserialize, serialize, CapabilityConfiguration, Handlers, HealthCheckRequest,
-    HealthCheckResponse,
-};
+pub use generated::*;
 
 #[cfg(feature = "guest")]
 use serde::{Deserialize, Serialize};
