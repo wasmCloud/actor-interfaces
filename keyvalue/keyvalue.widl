@@ -60,6 +60,10 @@ role Store {
     Indicates if a key exists
     """
     KeyExists(key: string): GetResponse
+    """
+    Retrieve a list of keys
+    """
+    KeysQuery(query: string): KeysQueryResponse
 }
 
 """
@@ -117,5 +121,12 @@ type SetOperationResponse {
 Response type for set query operations
 """
 type SetQueryResponse {
+    values: [string]
+}
+
+"""
+Response type for keys query operations
+"""
+type KeysQueryResponse {
     values: [string]
 }
