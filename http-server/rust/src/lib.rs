@@ -130,3 +130,50 @@ mod test {
         Ok(Response::ok())
     }
 }
+
+#[cfg(test)]
+#[cfg(feature = "guest")]
+mod path_segments {
+    extern crate wapc_guest;
+    use crate::Request;
+    use std::collections::HashMap;
+
+    #[test]
+    fn empty() {
+        let request = test_request("");
+        let segments = request.path_segments();
+        assert_eq!(segments.clone().len(), 0);
+    }
+
+    #[test]
+    fn single_slash() {
+        let request = test_request("/");
+        let segments = request.path_segments();
+        assert_eq!(segments.clone().len(), 0);
+    }
+
+    #[test]
+    fn single() {
+        let request = test_request("/foo");
+        let segments = request.path_segments();
+        assert_eq!(segments.clone().len(), 1);
+    }
+
+    #[test]
+    fn trailing_slash() {
+        let request = test_request("/foo/");
+        let segments = request.path_segments();
+        assert_eq!(segments.clone().len(), 1);
+    }
+
+    fn test_request(path: &str) -> Request {
+        Request {
+            method: "GET".to_string(),
+            body: Vec::new(),
+            header: HashMap::new(),
+            path: path.to_string(),
+            query_string: "".to_string(),
+        }
+    }
+
+}
