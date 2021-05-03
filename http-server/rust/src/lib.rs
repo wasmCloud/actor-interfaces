@@ -54,7 +54,11 @@ use std::str::FromStr;
 
 impl Request {
     pub fn path_segments(&self) -> Vec<&str> {
-        self.path.split('/').skip(1).collect::<Vec<_>>()
+        self.path
+            .trim_end_matches('/')
+            .split('/')
+            .skip(1)
+            .collect::<Vec<_>>()
     }
 
     pub fn method(&self) -> Method {
@@ -175,5 +179,4 @@ mod path_segments {
             query_string: "".to_string(),
         }
     }
-
 }
