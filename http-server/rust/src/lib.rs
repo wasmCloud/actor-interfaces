@@ -146,28 +146,38 @@ mod path_segments {
     fn empty() {
         let request = test_request("");
         let segments = request.path_segments();
-        assert_eq!(segments.clone().len(), 0);
+        assert_eq!(segments.get(0), None);
     }
 
     #[test]
     fn single_slash() {
         let request = test_request("/");
         let segments = request.path_segments();
-        assert_eq!(segments.clone().len(), 0);
+        assert_eq!(segments.get(0), None);
     }
 
     #[test]
     fn single() {
         let request = test_request("/foo");
         let segments = request.path_segments();
-        assert_eq!(segments.clone().len(), 1);
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments.clone().get(0), Some(&"foo"))
     }
 
     #[test]
     fn trailing_slash() {
         let request = test_request("/foo/");
         let segments = request.path_segments();
-        assert_eq!(segments.clone().len(), 1);
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments.clone().get(0), Some(&"foo"))
+    }
+
+    #[test]
+    fn multiple_trailing_slashes() {
+        let request = test_request("/foo////");
+        let segments = request.path_segments();
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments.clone().get(0), Some(&"foo"))
     }
 
     fn test_request(path: &str) -> Request {
