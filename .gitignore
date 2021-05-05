@@ -16,3 +16,6 @@ build
 # For AssemblyScript
 /node_modules/
 node_modules
+
+# for people using IntelliJ
+.idea

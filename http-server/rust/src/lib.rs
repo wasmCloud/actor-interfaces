@@ -146,38 +146,42 @@ mod path_segments {
     fn empty() {
         let request = test_request("");
         let segments = request.path_segments();
-        assert_eq!(segments.get(0), None);
+        assert_eq!(segments, vec![] as Vec<&str>);
     }
 
     #[test]
     fn single_slash() {
         let request = test_request("/");
         let segments = request.path_segments();
-        assert_eq!(segments.get(0), None);
+        assert_eq!(segments, vec![] as Vec<&str>);
     }
 
     #[test]
     fn single() {
         let request = test_request("/foo");
         let segments = request.path_segments();
-        assert_eq!(segments.len(), 1);
-        assert_eq!(segments.clone().get(0), Some(&"foo"))
+        assert_eq!(segments, vec!["foo"]);
     }
 
     #[test]
     fn trailing_slash() {
         let request = test_request("/foo/");
         let segments = request.path_segments();
-        assert_eq!(segments.len(), 1);
-        assert_eq!(segments.clone().get(0), Some(&"foo"))
+        assert_eq!(segments, vec!["foo"]);
     }
 
     #[test]
     fn multiple_trailing_slashes() {
         let request = test_request("/foo////");
         let segments = request.path_segments();
-        assert_eq!(segments.len(), 1);
-        assert_eq!(segments.clone().get(0), Some(&"foo"))
+        assert_eq!(segments, vec!["foo"]);
+    }
+
+    #[test]
+    fn multiple_segments() {
+        let request = test_request("/foo/bar/baz/");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec!["foo", "bar", "baz"]);
     }
 
     fn test_request(path: &str) -> Request {
