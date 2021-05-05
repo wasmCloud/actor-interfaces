@@ -54,7 +54,11 @@ use std::str::FromStr;
 
 impl Request {
     pub fn path_segments(&self) -> Vec<&str> {
-        self.path.split('/').skip(1).collect::<Vec<_>>()
+        self.path
+            .trim_end_matches('/')
+            .split('/')
+            .skip(1)
+            .collect::<Vec<_>>()
     }
 
     pub fn method(&self) -> Method {
@@ -128,5 +132,65 @@ mod test {
 
     fn hr(_req: Request) -> HandlerResult<Response> {
         Ok(Response::ok())
+    }
+}
+
+#[cfg(test)]
+#[cfg(feature = "guest")]
+mod path_segments {
+    extern crate wapc_guest;
+    use crate::Request;
+    use std::collections::HashMap;
+
+    #[test]
+    fn empty() {
+        let request = test_request("");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec![] as Vec<&str>);
+    }
+
+    #[test]
+    fn single_slash() {
+        let request = test_request("/");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec![] as Vec<&str>);
+    }
+
+    #[test]
+    fn single() {
+        let request = test_request("/foo");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec!["foo"]);
+    }
+
+    #[test]
+    fn trailing_slash() {
+        let request = test_request("/foo/");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec!["foo"]);
+    }
+
+    #[test]
+    fn multiple_trailing_slashes() {
+        let request = test_request("/foo////");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec!["foo"]);
+    }
+
+    #[test]
+    fn multiple_segments() {
+        let request = test_request("/foo/bar/baz/");
+        let segments = request.path_segments();
+        assert_eq!(segments, vec!["foo", "bar", "baz"]);
+    }
+
+    fn test_request(path: &str) -> Request {
+        Request {
+            method: "GET".to_string(),
+            body: Vec::new(),
+            header: HashMap::new(),
+            path: path.to_string(),
+            query_string: "".to_string(),
+        }
     }
 }
