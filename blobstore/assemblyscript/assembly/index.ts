@@ -9,9 +9,9 @@ export class Host {
   }
 
   // Create a container in a blobstore. Returns the container created if successful
-  createContainer(container: Container): Container {
+  createContainer(id: string): Container {
     const inputArgs = new CreateContainerArgs();
-    inputArgs.container = container;
+    inputArgs.id = id;
     const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
@@ -23,33 +23,38 @@ export class Host {
   }
 
   // Remove a container from a blobstore
-  removeContainer(container: Container): void {
+  removeContainer(id: string): BlobstoreResult {
     const inputArgs = new RemoveContainerArgs();
-    inputArgs.container = container;
-    hostCall(
+    inputArgs.id = id;
+    const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
       "RemoveContainer",
       inputArgs.toBuffer()
     );
+    const decoder = new Decoder(payload);
+    return BlobstoreResult.decode(decoder);
   }
 
   // Remove an object from a blobstore
-  removeObject(blob: Blob): void {
+  removeObject(id: string, container_id: string): BlobstoreResult {
     const inputArgs = new RemoveObjectArgs();
-    inputArgs.blob = blob;
-    hostCall(
+    inputArgs.id = id;
+    inputArgs.container_id = container_id;
+    const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
       "RemoveObject",
       inputArgs.toBuffer()
     );
+    const decoder = new Decoder(payload);
+    return BlobstoreResult.decode(decoder);
   }
 
   // Returns a list of blobs that are present in the specified container
-  listObjects(container: Container): BlobList {
+  listObjects(container_id: string): BlobList {
     const inputArgs = new ListObjectsArgs();
-    inputArgs.container = container;
+    inputArgs.container_id = container_id;
     const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
@@ -63,47 +68,62 @@ export class Host {
   // Upload a file chunk to a blobstore, which may only be part of a full file. This
   // must be called AFTER the StartUpload operation. Chunks should be small, as
   // memory over a few megabytes may exceed the wasm memory allocation.
-  uploadChunk(chunk: FileChunk): void {
+  uploadChunk(chunk: FileChunk): BlobstoreResult {
     const inputArgs = new UploadChunkArgs();
     inputArgs.chunk = chunk;
-    hostCall(
+    const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
       "UploadChunk",
       inputArgs.toBuffer()
     );
+    const decoder = new Decoder(payload);
+    return BlobstoreResult.decode(decoder);
   }
 
   // Issue a request to start a download from a blobstore. Chunks will be sent to the
   // function that's registered with the ReceiveChunk operation.
-  startDownload(request: StreamRequest): void {
+  startDownload(
+    blob_id: string,
+    container_id: string,
+    chunk_size: u64,
+    context: string
+  ): BlobstoreResult {
     const inputArgs = new StartDownloadArgs();
-    inputArgs.request = request;
-    hostCall(
+    inputArgs.blob_id = blob_id;
+    inputArgs.container_id = container_id;
+    inputArgs.chunk_size = chunk_size;
+    inputArgs.context = context;
+    const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
       "StartDownload",
       inputArgs.toBuffer()
     );
+    const decoder = new Decoder(payload);
+    return BlobstoreResult.decode(decoder);
   }
 
   // Begin the upload process with the first chunk of a full file. Subsequent chunks
   // should be uploaded with the UploadChunk operation.
-  startUpload(chunk: FileChunk): void {
+  startUpload(chunk: FileChunk): BlobstoreResult {
     const inputArgs = new StartUploadArgs();
     inputArgs.chunk = chunk;
-    hostCall(
+    const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
       "StartUpload",
       inputArgs.toBuffer()
     );
+    const decoder = new Decoder(payload);
+    return BlobstoreResult.decode(decoder);
   }
 
   // Retreives information about a blob
-  getObjectInfo(blob: Blob): Blob {
+  getObjectInfo(blob_id: string, container_id: string): Blob {
     const inputArgs = new GetObjectInfoArgs();
-    inputArgs.blob = blob;
+    inputArgs.blob_id = blob_id;
+    inputArgs.container_id = container_id;
     const payload = hostCall(
       this.binding,
       "wasmcloud:blobstore",
@@ -135,7 +155,7 @@ function ReceiveChunkWrapper(payload: ArrayBuffer): ArrayBuffer {
 }
 
 export class CreateContainerArgs implements Codec {
-  container: Container = new Container();
+  id: string = "";
 
   static decodeNullable(decoder: Decoder): CreateContainerArgs | null {
     if (decoder.isNextNil()) return null;
@@ -156,8 +176,8 @@ export class CreateContainerArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "container") {
-        this.container = Container.decode(decoder);
+      if (field == "id") {
+        this.id = decoder.readString();
       } else {
         decoder.skip();
       }
@@ -166,8 +186,8 @@ export class CreateContainerArgs implements Codec {
 
   encode(encoder: Writer): void {
     encoder.writeMapSize(1);
-    encoder.writeString("container");
-    this.container.encode(encoder);
+    encoder.writeString("id");
+    encoder.writeString(this.id);
   }
 
   toBuffer(): ArrayBuffer {
@@ -181,7 +201,7 @@ export class CreateContainerArgs implements Codec {
 }
 
 export class RemoveContainerArgs implements Codec {
-  container: Container = new Container();
+  id: string = "";
 
   static decodeNullable(decoder: Decoder): RemoveContainerArgs | null {
     if (decoder.isNextNil()) return null;
@@ -202,8 +222,8 @@ export class RemoveContainerArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "container") {
-        this.container = Container.decode(decoder);
+      if (field == "id") {
+        this.id = decoder.readString();
       } else {
         decoder.skip();
       }
@@ -212,8 +232,8 @@ export class RemoveContainerArgs implements Codec {
 
   encode(encoder: Writer): void {
     encoder.writeMapSize(1);
-    encoder.writeString("container");
-    this.container.encode(encoder);
+    encoder.writeString("id");
+    encoder.writeString(this.id);
   }
 
   toBuffer(): ArrayBuffer {
@@ -227,7 +247,8 @@ export class RemoveContainerArgs implements Codec {
 }
 
 export class RemoveObjectArgs implements Codec {
-  blob: Blob = new Blob();
+  id: string = "";
+  container_id: string = "";
 
   static decodeNullable(decoder: Decoder): RemoveObjectArgs | null {
     if (decoder.isNextNil()) return null;
@@ -248,8 +269,10 @@ export class RemoveObjectArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "blob") {
-        this.blob = Blob.decode(decoder);
+      if (field == "id") {
+        this.id = decoder.readString();
+      } else if (field == "container_id") {
+        this.container_id = decoder.readString();
       } else {
         decoder.skip();
       }
@@ -257,9 +280,11 @@ export class RemoveObjectArgs implements Codec {
   }
 
   encode(encoder: Writer): void {
-    encoder.writeMapSize(1);
-    encoder.writeString("blob");
-    this.blob.encode(encoder);
+    encoder.writeMapSize(2);
+    encoder.writeString("id");
+    encoder.writeString(this.id);
+    encoder.writeString("container_id");
+    encoder.writeString(this.container_id);
   }
 
   toBuffer(): ArrayBuffer {
@@ -273,7 +298,7 @@ export class RemoveObjectArgs implements Codec {
 }
 
 export class ListObjectsArgs implements Codec {
-  container: Container = new Container();
+  container_id: string = "";
 
   static decodeNullable(decoder: Decoder): ListObjectsArgs | null {
     if (decoder.isNextNil()) return null;
@@ -294,8 +319,8 @@ export class ListObjectsArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "container") {
-        this.container = Container.decode(decoder);
+      if (field == "container_id") {
+        this.container_id = decoder.readString();
       } else {
         decoder.skip();
       }
@@ -304,8 +329,8 @@ export class ListObjectsArgs implements Codec {
 
   encode(encoder: Writer): void {
     encoder.writeMapSize(1);
-    encoder.writeString("container");
-    this.container.encode(encoder);
+    encoder.writeString("container_id");
+    encoder.writeString(this.container_id);
   }
 
   toBuffer(): ArrayBuffer {
@@ -365,7 +390,10 @@ export class UploadChunkArgs implements Codec {
 }
 
 export class StartDownloadArgs implements Codec {
-  request: StreamRequest = new StreamRequest();
+  blob_id: string = "";
+  container_id: string = "";
+  chunk_size: u64 = 0;
+  context: string | null = null;
 
   static decodeNullable(decoder: Decoder): StartDownloadArgs | null {
     if (decoder.isNextNil()) return null;
@@ -386,8 +414,18 @@ export class StartDownloadArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "request") {
-        this.request = StreamRequest.decode(decoder);
+      if (field == "blob_id") {
+        this.blob_id = decoder.readString();
+      } else if (field == "container_id") {
+        this.container_id = decoder.readString();
+      } else if (field == "chunk_size") {
+        this.chunk_size = decoder.readUInt64();
+      } else if (field == "context") {
+        if (decoder.isNextNil()) {
+          this.context = null;
+        } else {
+          this.context = decoder.readString();
+        }
       } else {
         decoder.skip();
       }
@@ -395,9 +433,19 @@ export class StartDownloadArgs implements Codec {
   }
 
   encode(encoder: Writer): void {
-    encoder.writeMapSize(1);
-    encoder.writeString("request");
-    this.request.encode(encoder);
+    encoder.writeMapSize(4);
+    encoder.writeString("blob_id");
+    encoder.writeString(this.blob_id);
+    encoder.writeString("container_id");
+    encoder.writeString(this.container_id);
+    encoder.writeString("chunk_size");
+    encoder.writeUInt64(this.chunk_size);
+    encoder.writeString("context");
+    if (this.context === null) {
+      encoder.writeNil();
+    } else {
+      encoder.writeString(this.context);
+    }
   }
 
   toBuffer(): ArrayBuffer {
@@ -457,7 +505,8 @@ export class StartUploadArgs implements Codec {
 }
 
 export class GetObjectInfoArgs implements Codec {
-  blob: Blob = new Blob();
+  blob_id: string = "";
+  container_id: string = "";
 
   static decodeNullable(decoder: Decoder): GetObjectInfoArgs | null {
     if (decoder.isNextNil()) return null;
@@ -478,8 +527,10 @@ export class GetObjectInfoArgs implements Codec {
       numFields--;
       const field = decoder.readString();
 
-      if (field == "blob") {
-        this.blob = Blob.decode(decoder);
+      if (field == "blob_id") {
+        this.blob_id = decoder.readString();
+      } else if (field == "container_id") {
+        this.container_id = decoder.readString();
       } else {
         decoder.skip();
       }
@@ -487,9 +538,11 @@ export class GetObjectInfoArgs implements Codec {
   }
 
   encode(encoder: Writer): void {
-    encoder.writeMapSize(1);
-    encoder.writeString("blob");
-    this.blob.encode(encoder);
+    encoder.writeMapSize(2);
+    encoder.writeString("blob_id");
+    encoder.writeString(this.blob_id);
+    encoder.writeString("container_id");
+    encoder.writeString(this.container_id);
   }
 
   toBuffer(): ArrayBuffer {
@@ -975,108 +1028,6 @@ export class BlobListBuilder {
   }
 }
 
-// Used to request a download from a blobstore
-export class StreamRequest implements Codec {
-  id: string = "";
-  container: Container = new Container();
-  chunkSize: u64 = 0;
-  context: string | null = null;
-
-  static decodeNullable(decoder: Decoder): StreamRequest | null {
-    if (decoder.isNextNil()) return null;
-    return StreamRequest.decode(decoder);
-  }
-
-  // decode
-  static decode(decoder: Decoder): StreamRequest {
-    const o = new StreamRequest();
-    o.decode(decoder);
-    return o;
-  }
-
-  decode(decoder: Decoder): void {
-    var numFields = decoder.readMapSize();
-
-    while (numFields > 0) {
-      numFields--;
-      const field = decoder.readString();
-
-      if (field == "id") {
-        this.id = decoder.readString();
-      } else if (field == "container") {
-        this.container = Container.decode(decoder);
-      } else if (field == "chunkSize") {
-        this.chunkSize = decoder.readUInt64();
-      } else if (field == "context") {
-        if (decoder.isNextNil()) {
-          this.context = null;
-        } else {
-          this.context = decoder.readString();
-        }
-      } else {
-        decoder.skip();
-      }
-    }
-  }
-
-  encode(encoder: Writer): void {
-    encoder.writeMapSize(4);
-    encoder.writeString("id");
-    encoder.writeString(this.id);
-    encoder.writeString("container");
-    this.container.encode(encoder);
-    encoder.writeString("chunkSize");
-    encoder.writeUInt64(this.chunkSize);
-    encoder.writeString("context");
-    if (this.context === null) {
-      encoder.writeNil();
-    } else {
-      encoder.writeString(this.context);
-    }
-  }
-
-  toBuffer(): ArrayBuffer {
-    let sizer = new Sizer();
-    this.encode(sizer);
-    let buffer = new ArrayBuffer(sizer.length);
-    let encoder = new Encoder(buffer);
-    this.encode(encoder);
-    return buffer;
-  }
-
-  static newBuilder(): StreamRequestBuilder {
-    return new StreamRequestBuilder();
-  }
-}
-
-export class StreamRequestBuilder {
-  instance: StreamRequest = new StreamRequest();
-
-  withId(id: string): StreamRequestBuilder {
-    this.instance.id = id;
-    return this;
-  }
-
-  withContainer(container: Container): StreamRequestBuilder {
-    this.instance.container = container;
-    return this;
-  }
-
-  withChunkSize(chunkSize: u64): StreamRequestBuilder {
-    this.instance.chunkSize = chunkSize;
-    return this;
-  }
-
-  withContext(context: string | null): StreamRequestBuilder {
-    this.instance.context = context;
-    return this;
-  }
-
-  build(): StreamRequest {
-    return this.instance;
-  }
-}
-
 export class Transfer implements Codec {
   blobId: string = "";
   container: Container = new Container();
@@ -1194,6 +1145,88 @@ export class TransferBuilder {
   }
 
   build(): Transfer {
+    return this.instance;
+  }
+}
+
+// Used to return success and error information for common blobstore operations
+export class BlobstoreResult implements Codec {
+  success: bool = false;
+  error: string | null = null;
+
+  static decodeNullable(decoder: Decoder): BlobstoreResult | null {
+    if (decoder.isNextNil()) return null;
+    return BlobstoreResult.decode(decoder);
+  }
+
+  // decode
+  static decode(decoder: Decoder): BlobstoreResult {
+    const o = new BlobstoreResult();
+    o.decode(decoder);
+    return o;
+  }
+
+  decode(decoder: Decoder): void {
+    var numFields = decoder.readMapSize();
+
+    while (numFields > 0) {
+      numFields--;
+      const field = decoder.readString();
+
+      if (field == "success") {
+        this.success = decoder.readBool();
+      } else if (field == "error") {
+        if (decoder.isNextNil()) {
+          this.error = null;
+        } else {
+          this.error = decoder.readString();
+        }
+      } else {
+        decoder.skip();
+      }
+    }
+  }
+
+  encode(encoder: Writer): void {
+    encoder.writeMapSize(2);
+    encoder.writeString("success");
+    encoder.writeBool(this.success);
+    encoder.writeString("error");
+    if (this.error === null) {
+      encoder.writeNil();
+    } else {
+      encoder.writeString(this.error);
+    }
+  }
+
+  toBuffer(): ArrayBuffer {
+    let sizer = new Sizer();
+    this.encode(sizer);
+    let buffer = new ArrayBuffer(sizer.length);
+    let encoder = new Encoder(buffer);
+    this.encode(encoder);
+    return buffer;
+  }
+
+  static newBuilder(): BlobstoreResultBuilder {
+    return new BlobstoreResultBuilder();
+  }
+}
+
+export class BlobstoreResultBuilder {
+  instance: BlobstoreResult = new BlobstoreResult();
+
+  withSuccess(success: bool): BlobstoreResultBuilder {
+    this.instance.success = success;
+    return this;
+  }
+
+  withError(error: string | null): BlobstoreResultBuilder {
+    this.instance.error = error;
+    return this;
+  }
+
+  build(): BlobstoreResult {
     return this.instance;
   }
 }

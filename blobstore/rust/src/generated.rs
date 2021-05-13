@@ -39,8 +39,8 @@ pub fn default() -> Host {
 #[cfg(feature = "guest")]
 impl Host {
     /// Create a container in a blobstore. Returns the container created if successful
-    pub fn create_container(&self, container: Container) -> HandlerResult<Container> {
-        let input_args = CreateContainerArgs { container };
+    pub fn create_container(&self, id: String) -> HandlerResult<Container> {
+        let input_args = CreateContainerArgs { id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -54,32 +54,42 @@ impl Host {
         .map_err(|e| e.into())
     }
     /// Remove a container from a blobstore
-    pub fn remove_container(&self, container: Container) -> HandlerResult<()> {
-        let input_args = RemoveContainerArgs { container };
+    pub fn remove_container(&self, id: String) -> HandlerResult<BlobstoreResult> {
+        let input_args = RemoveContainerArgs { id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "RemoveContainer",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
     /// Remove an object from a blobstore
-    pub fn remove_object(&self, blob: Blob) -> HandlerResult<()> {
-        let input_args = RemoveObjectArgs { blob };
+    pub fn remove_object(
+        &self,
+        id: String,
+        container_id: String,
+    ) -> HandlerResult<BlobstoreResult> {
+        let input_args = RemoveObjectArgs { id, container_id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "RemoveObject",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
     /// Returns a list of blobs that are present in the specified container
-    pub fn list_objects(&self, container: Container) -> HandlerResult<BlobList> {
-        let input_args = ListObjectsArgs { container };
+    pub fn list_objects(&self, container_id: String) -> HandlerResult<BlobList> {
+        let input_args = ListObjectsArgs { container_id };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -95,7 +105,7 @@ impl Host {
     /// Upload a file chunk to a blobstore, which may only be part of a full file. This
     /// must be called AFTER the StartUpload operation. Chunks should be small, as
     /// memory over a few megabytes may exceed the wasm memory allocation.
-    pub fn upload_chunk(&self, chunk: FileChunk) -> HandlerResult<()> {
+    pub fn upload_chunk(&self, chunk: FileChunk) -> HandlerResult<BlobstoreResult> {
         let input_args = UploadChunkArgs { chunk };
         host_call(
             &self.binding,
@@ -103,25 +113,42 @@ impl Host {
             "UploadChunk",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
     /// Issue a request to start a download from a blobstore. Chunks will be sent to the
     /// function that's registered with the ReceiveChunk operation.
-    pub fn start_download(&self, request: StreamRequest) -> HandlerResult<()> {
-        let input_args = StartDownloadArgs { request };
+    pub fn start_download(
+        &self,
+        blob_id: String,
+        container_id: String,
+        chunk_size: u64,
+        context: String,
+    ) -> HandlerResult<BlobstoreResult> {
+        let input_args = StartDownloadArgs {
+            blob_id,
+            container_id,
+            chunk_size,
+            context,
+        };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
             "StartDownload",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
     /// Begin the upload process with the first chunk of a full file. Subsequent chunks
     /// should be uploaded with the UploadChunk operation.
-    pub fn start_upload(&self, chunk: FileChunk) -> HandlerResult<()> {
+    pub fn start_upload(&self, chunk: FileChunk) -> HandlerResult<BlobstoreResult> {
         let input_args = StartUploadArgs { chunk };
         host_call(
             &self.binding,
@@ -129,12 +156,18 @@ impl Host {
             "StartUpload",
             &serialize(input_args)?,
         )
-        .map(|_vec| ())
+        .map(|vec| {
+            let resp = deserialize::<BlobstoreResult>(vec.as_ref()).unwrap();
+            resp
+        })
         .map_err(|e| e.into())
     }
     /// Retreives information about a blob
-    pub fn get_object_info(&self, blob: Blob) -> HandlerResult<Blob> {
-        let input_args = GetObjectInfoArgs { blob };
+    pub fn get_object_info(&self, blob_id: String, container_id: String) -> HandlerResult<Blob> {
+        let input_args = GetObjectInfoArgs {
+            blob_id,
+            container_id,
+        };
         host_call(
             &self.binding,
             "wasmcloud:blobstore",
@@ -177,26 +210,28 @@ fn receive_chunk_wrapper(input_payload: &[u8]) -> CallResult {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct CreateContainerArgs {
-    #[serde(rename = "container")]
-    pub container: Container,
+    #[serde(rename = "id")]
+    pub id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct RemoveContainerArgs {
-    #[serde(rename = "container")]
-    pub container: Container,
+    #[serde(rename = "id")]
+    pub id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct RemoveObjectArgs {
-    #[serde(rename = "blob")]
-    pub blob: Blob,
+    #[serde(rename = "id")]
+    pub id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct ListObjectsArgs {
-    #[serde(rename = "container")]
-    pub container: Container,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -207,8 +242,14 @@ pub struct UploadChunkArgs {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct StartDownloadArgs {
-    #[serde(rename = "request")]
-    pub request: StreamRequest,
+    #[serde(rename = "blob_id")]
+    pub blob_id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
+    #[serde(rename = "chunk_size")]
+    pub chunk_size: u64,
+    #[serde(rename = "context")]
+    pub context: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -219,8 +260,10 @@ pub struct StartUploadArgs {
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct GetObjectInfoArgs {
-    #[serde(rename = "blob")]
-    pub blob: Blob,
+    #[serde(rename = "blob_id")]
+    pub blob_id: String,
+    #[serde(rename = "container_id")]
+    pub container_id: String,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
@@ -285,19 +328,6 @@ pub struct BlobList {
     pub blobs: Vec<Blob>,
 }
 
-/// Used to request a download from a blobstore
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
-pub struct StreamRequest {
-    #[serde(rename = "id")]
-    pub id: String,
-    #[serde(rename = "container")]
-    pub container: Container,
-    #[serde(rename = "chunkSize")]
-    pub chunk_size: u64,
-    #[serde(rename = "context")]
-    pub context: Option<String>,
-}
-
 #[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
 pub struct Transfer {
     #[serde(rename = "blobId")]
@@ -312,6 +342,15 @@ pub struct Transfer {
     pub total_chunks: u64,
     #[serde(rename = "context")]
     pub context: Option<String>,
+}
+
+/// Used to return success and error information for common blobstore operations
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone)]
+pub struct BlobstoreResult {
+    #[serde(rename = "success")]
+    pub success: bool,
+    #[serde(rename = "error")]
+    pub error: Option<String>,
 }
 
 /// The standard function for serializing codec structs into a format that can be
