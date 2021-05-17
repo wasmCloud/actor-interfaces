@@ -5,39 +5,39 @@ role Store {
     Create a container in a blobstore.
     Returns the container created if successful
     """
-    CreateContainer(container: Container): Container
+    CreateContainer(id: string): Container
     """
     Remove a container from a blobstore
     """
-    RemoveContainer(container: Container): void
+    RemoveContainer(id: string): BlobstoreResult
     """
     Remove an object from a blobstore
     """
-    RemoveObject(blob: Blob): void
+    RemoveObject(id: string, container_id: string): BlobstoreResult
     """
     Returns a list of blobs that are present in the specified container
     """
-    ListObjects(container: Container): BlobList
+    ListObjects(container_id: string): BlobList
     """
     Upload a file chunk to a blobstore, which may only be part of a full file.
     This must be called AFTER the StartUpload operation. Chunks should be
     small, as memory over a few megabytes may exceed the wasm memory allocation.
     """
-    UploadChunk(chunk: FileChunk): void
+    UploadChunk(chunk: FileChunk): BlobstoreResult
     """
     Issue a request to start a download from a blobstore. Chunks will be sent
     to the function that's registered with the ReceiveChunk operation.
     """
-    StartDownload(request: StreamRequest): void
+    StartDownload(blob_id: string, container_id: string, chunk_size: u64, context: string?): BlobstoreResult
     """
     Begin the upload process with the first chunk of a full file. Subsequent
     chunks should be uploaded with the UploadChunk operation.
     """
-    StartUpload(chunk: FileChunk): void
+    StartUpload(chunk: FileChunk): BlobstoreResult
     """
     Retreives information about a blob
     """
-    GetObjectInfo(blob: Blob): Blob
+    GetObjectInfo(blob_id: string, container_id: string): Blob
 }
 
 role Actor {
@@ -96,16 +96,6 @@ type BlobList {
     blobs: [Blob]
 }
 
-"""
-Used to request a download from a blobstore
-"""
-type StreamRequest {
-    id: string
-    container: Container
-    chunkSize: u64
-    context: string?
-}
-
 type Transfer {
     blobId: string
     container: Container
@@ -113,4 +103,12 @@ type Transfer {
     totalSize: u64
     totalChunks: u64
     context: string?
+}
+
+"""
+Used to return success and error information for common blobstore operations
+"""
+type BlobstoreResult {
+    success: bool
+    error: string?
 }
