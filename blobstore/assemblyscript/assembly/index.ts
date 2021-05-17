@@ -87,7 +87,7 @@ export class Host {
     blob_id: string,
     container_id: string,
     chunk_size: u64,
-    context: string
+    context: string | null
   ): BlobstoreResult {
     const inputArgs = new StartDownloadArgs();
     inputArgs.blob_id = blob_id;

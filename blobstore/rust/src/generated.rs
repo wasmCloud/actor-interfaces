@@ -126,7 +126,7 @@ impl Host {
         blob_id: String,
         container_id: String,
         chunk_size: u64,
-        context: String,
+        context: Option<String>,
     ) -> HandlerResult<BlobstoreResult> {
         let input_args = StartDownloadArgs {
             blob_id,

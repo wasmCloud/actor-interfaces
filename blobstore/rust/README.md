@@ -15,7 +15,7 @@ Amazon S3, Azure blob storage, Google blob storage, and more.
 ## Example
 
 ```rust
-extern crate wapc_guest as guest;
+use wapc_guest as guest;
 use guest::prelude::*;
 use wasmcloud_actor_blobstore as blobstore;
 use wasmcloud_actor_http_server as http;
